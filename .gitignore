@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Edytory
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logi i tymczasowe
+*.log
+*.tmp
+
+# Środowisko
+.env
+.env.local
+.env.*.local
+
+# Build (na przyszłość)
+node_modules/
+dist/
+build/
+
+# Vercel
+.vercel
