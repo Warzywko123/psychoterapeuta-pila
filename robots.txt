@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /polityka-prywatnosci.html
 
-Sitemap: https://psychoterapia-pila.pl/sitemap.xml
+Sitemap: https://psychoterapeuta-pila.pl/sitemap.xml
