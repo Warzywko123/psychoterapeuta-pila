@@ -7,28 +7,41 @@
   <!-- SEO -->
   <title>Psychoterapeuta Piła – mgr Joanna Grochowska | Terapia indywidualna, par, rodzin</title>
   <meta name="description" content="Certyfikowana psychoterapeutka w Pile. Terapia indywidualna, par, rodzin, dzieci i młodzieży. Umów wizytę: 501 393 887 lub 729 912 230.">
-  <meta name="keywords" content="psychoterapeuta Piła, psycholog Piła, terapia par Piła, psychoterapia Piła">
   <meta name="author" content="mgr Joanna Grochowska">
   <link rel="canonical" href="https://psychoterapeuta-pila.pl/">
   <meta name="robots" content="index, follow">
 
   <!-- Open Graph (jak wygląda link gdy ktoś wkleja na Facebooka/WhatsAppa) -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gabinet Psychoterapii DARD">
   <meta property="og:title" content="Psychoterapeuta Piła – mgr Joanna Grochowska">
   <meta property="og:description" content="Certyfikowana psychoterapeutka. Terapia indywidualna, par, rodzin w Pile.">
   <meta property="og:url" content="https://psychoterapeuta-pila.pl/">
   <meta property="og:locale" content="pl_PL">
+  <meta property="og:image" content="https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg">
+  <meta property="og:image:width" content="1086">
+  <meta property="og:image:height" content="1448">
+  <meta property="og:image:alt" content="mgr Joanna Grochowska — psychoterapeutka w Pile">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Psychoterapeuta Piła – mgr Joanna Grochowska">
+  <meta name="twitter:description" content="Certyfikowana psychoterapeutka. Terapia indywidualna, par, rodzin w Pile.">
+  <meta name="twitter:image" content="https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg">
 
   <!-- Czcionki Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Preload hero image (AVIF) — poprawia LCP (Largest Contentful Paint) -->
+  <link rel="preload" as="image" type="image/avif" href="obrazy/joanna-grochowska.avif" fetchpriority="high">
+
   <!-- Favikona (ikona w karcie przeglądarki) -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
   <!-- Style -->
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 
   <!-- Dane strukturalne dla Google (Schema.org) -->
   <script type="application/ld+json">
@@ -39,7 +52,7 @@
     "name": "Gabinet Psychoterapii DARD mgr Joanna Grochowska",
     "alternateName": "Gabinet DARD",
     "image": "https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg",
-    "telephone": "+48501393887",
+    "telephone": ["+48501393887", "+48729912230"],
     "url": "https://psychoterapeuta-pila.pl",
     "priceRange": "$$",
     "address": {
@@ -55,7 +68,80 @@
       "longitude": "16.7380"
     },
     "medicalSpecialty": "Psychiatric",
-    "areaServed": ["Piła", "Wałcz", "Trzcianka", "Czarnków", "Złotów"]
+    "areaServed": ["Piła", "Wałcz", "Trzcianka", "Czarnków", "Złotów", "Chodzież"],
+    "provider": {
+      "@type": "Person",
+      "name": "mgr Joanna Grochowska",
+      "jobTitle": "Certyfikowana psychoterapeutka",
+      "image": "https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg",
+      "url": "https://psychoterapeuta-pila.pl/o-mnie.html",
+      "worksFor": {
+        "@type": "MedicalBusiness",
+        "@id": "https://psychoterapeuta-pila.pl/#business"
+      },
+      "knowsAbout": [
+        "Psychoterapia indywidualna",
+        "Psychoterapia par i małżeństw",
+        "Terapia rodzin",
+        "Psychoterapia dzieci",
+        "Psychoterapia młodzieży",
+        "Terapia online",
+        "Interwencja kryzysowa",
+        "Terapia uzależnień",
+        "Terapia DDA — Dorosłe Dzieci z Rodzin Dysfunkcyjnych",
+        "Diagnostyka uzależnień dla kierowców po utracie prawa jazdy",
+        "Podejście integracyjne",
+        "Psychoterapia systemowa",
+        "Psychoterapia poznawczo-behawioralna",
+        "Depresja",
+        "Zaburzenia lękowe",
+        "Kryzysy życiowe"
+      ],
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "Certyfikat psychoterapeuty",
+          "name": "Certyfikat psychoterapeuty WTTS Poznań",
+          "recognizedBy": {
+            "@type": "Organization",
+            "name": "Wielkopolskie Towarzystwo Terapii Systemowej w Poznaniu"
+          }
+        },
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "Certyfikat terapeuty uzależnień",
+          "name": "Certyfikat psychoterapeuty uzależnień, współuzależnienia oraz DDA",
+          "recognizedBy": {
+            "@type": "Organization",
+            "name": "Państwowa Agencja Rozwiązywania Problemów Alkoholowych w Warszawie"
+          }
+        }
+      ],
+      "alumniOf": [
+        {
+          "@type": "EducationalOrganization",
+          "name": "Akademia Bydgoska im. Kazimierza Wielkiego"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "name": "Instytut Psychologii Zdrowia PTP w Warszawie"
+        },
+        {
+          "@type": "EducationalOrganization",
+          "name": "Wielkopolskie Towarzystwo Terapii Systemowej w Poznaniu"
+        }
+      ],
+      "memberOf": [
+        {
+          "@type": "Organization",
+          "name": "Wielkopolskie Towarzystwo Terapii Systemowej"
+        },
+        {
+          "@type": "Organization",
+          "name": "Polskie Towarzystwo Psychiatryczne"
+        }
+      ]
+    }
   }
   </script>
   <!-- Google Analytics 4 -->
@@ -94,7 +180,7 @@
         <div class="hero__content">
           <span class="hero__badge">✓ Certyfikowana psychoterapeutka</span>
           <h1 class="hero__title">mgr Joanna Grochowska</h1>
-          <p class="hero__subtitle">Psychoterapia indywidualna, par, rodzin oraz dzieci i młodzieży w Pile <strong style="color: var(--color-primary-dark); font-weight: 700;">w ramach wizyt prywatnych</strong>.</p>
+          <p class="hero__subtitle">Psychoterapia indywidualna, par, rodzin oraz dzieci i młodzieży w Pile <strong class="hero__subtitle-emphasis">w ramach wizyt prywatnych</strong>.</p>
           <p class="hero__location">📍 Al. Wojska Polskiego 49b, Piła</p>
           <div class="hero__cta">
             <a href="tel:+48501393887" class="btn btn--accent">📞 Umów wizytę: 501 393 887</a>
@@ -149,7 +235,7 @@
             <p class="service-card__text">Szybka pomoc w sytuacjach kryzysu emocjonalnego, traumy, straty.</p>
           </article>
         </div>
-        <div style="text-align:center; margin-top: 3rem;">
+        <div class="btn-wrapper--center">
           <a href="oferta.html" class="btn btn--primary">Zobacz pełną ofertę →</a>
         </div>
       </div>
@@ -179,7 +265,7 @@
             <p class="testimonial__author">— Oskar A., sierpień 2021</p>
           </article>
         </div>
-        <div style="text-align:center; margin-top: 3rem;">
+        <div class="btn-wrapper--center">
           <a href="opinie.html" class="btn btn--outline">Wszystkie opinie →</a>
         </div>
       </div>
@@ -219,6 +305,7 @@
         <a href="o-mnie.html" class="footer__link">O mnie</a>
         <a href="oferta.html" class="footer__link">Oferta</a>
         <a href="opinie.html" class="footer__link">Opinie</a>
+        <a href="faq.html" class="footer__link">FAQ</a>
         <a href="kontakt.html" class="footer__link">Kontakt</a>
         <a href="polityka-prywatnosci.html" class="footer__link">Polityka prywatności</a>
       </div>

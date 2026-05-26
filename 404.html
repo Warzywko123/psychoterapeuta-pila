@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=3">
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-K3NLEFJYMV"></script>
   <script>
@@ -41,20 +41,20 @@
   </header>
 
   <main>
-    <div style="text-align: center; padding: 5rem 2rem; max-width: 640px; margin: 0 auto;">
-      <p style="font-family: var(--font-serif); font-size: clamp(5rem, 15vw, 9rem); color: var(--color-primary); line-height: 1; margin-bottom: 1rem; font-weight: 700;">404</p>
-      <h1 style="margin-bottom: 1rem;">Tutaj nic nie ma</h1>
-      <p style="font-size: 1.125rem; color: var(--color-text-light); margin-bottom: 2rem; line-height: 1.7;">
+    <div class="error-page">
+      <p class="error-page__code">404</p>
+      <h1 class="error-page__title">Tutaj nic nie ma</h1>
+      <p class="error-page__text">
         Wygląda na to, że strona, której szukasz, nie istnieje. Może została przeniesiona, a może adres jest błędny.
       </p>
-      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
+      <div class="error-page__actions">
         <a href="index.html" class="btn btn--primary">← Strona główna</a>
         <a href="kontakt.html" class="btn btn--outline">Kontakt</a>
       </div>
 
-      <div style="border-top: 1px solid var(--color-border); padding-top: 2rem; margin-top: 2rem;">
-        <p style="font-size: 0.95rem; color: var(--color-text-light); margin-bottom: 1rem;">Albo zadzwoń bezpośrednio:</p>
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <div class="error-page__phones-section">
+        <p>Albo zadzwoń bezpośrednio:</p>
+        <div class="error-page__phones">
           <a href="tel:+48501393887" class="btn btn--accent">📞 501 393 887</a>
           <a href="tel:+48729912230" class="btn btn--accent">📞 729 912 230</a>
         </div>

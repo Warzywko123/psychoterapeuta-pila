@@ -551,6 +551,14 @@ ul { list-style: none; }
   border-left: 4px solid var(--color-primary);
 }
 
+.credentials + .credentials {
+  margin-top: 1rem;
+}
+
+.credentials--accent {
+  border-left-color: var(--color-accent);
+}
+
 .credentials h3 {
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -886,4 +894,117 @@ ul { list-style: none; }
   list-style: disc;
   margin-bottom: 0.5rem;
   line-height: 1.7;
+}
+
+/* --- Wyróżniony fragment w hero (np. "w ramach wizyt prywatnych") --- */
+.hero__subtitle-emphasis {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+/* --- Podtytuł na page-header (np. "Sesja terapeutyczna trwa 50 minut...") --- */
+.page-header__lead {
+  opacity: 0.9;
+  margin-top: 0.5rem;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --- Wyśrodkowany kontener na przycisk (np. "Zobacz pełną ofertę →") --- */
+.btn-wrapper--center {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+/* --- Pudełko informacyjne z lewym akcentem (np. "Dojazd:" na kontakt.html) --- */
+.info-box {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: var(--color-bg-alt);
+  border-radius: 12px;
+  border-left: 4px solid var(--color-accent);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.info-box strong {
+  color: var(--color-primary-dark);
+}
+
+/* --- Notatka pod siatką opinii ("Powyższe opinie pochodzą...") --- */
+.testimonials-note {
+  margin-top: 3rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--color-bg-alt);
+  border-radius: 12px;
+}
+
+.testimonials-note p {
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* --- Wartość w kontakt-block bez wyróżnienia (np. cennik, godziny) --- */
+.contact-block__value--plain {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-text);
+}
+
+/* --- Strona 404 --- */
+.error-page {
+  text-align: center;
+  padding: 5rem 2rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.error-page__code {
+  font-family: var(--font-serif);
+  font-size: clamp(5rem, 15vw, 9rem);
+  color: var(--color-primary);
+  line-height: 1;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.error-page__title {
+  margin-bottom: 1rem;
+}
+
+.error-page__text {
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+.error-page__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.error-page__phones-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 2rem;
+  margin-top: 2rem;
+}
+
+.error-page__phones-section p {
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  margin-bottom: 1rem;
+}
+
+.error-page__phones {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }

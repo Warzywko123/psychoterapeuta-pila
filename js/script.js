@@ -44,4 +44,18 @@
     });
   });
 
+  // ----- Śledzenie kliknięć w numer telefonu (GA4) -----
+  // Wysyła event "phone_click" do Google Analytics gdy ktoś kliknie "Zadzwoń"
+  document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+    link.addEventListener('click', function() {
+      if (typeof gtag === 'function') {
+        gtag('event', 'phone_click', {
+          phone_number: this.getAttribute('href').replace('tel:', ''),
+          link_text: this.textContent.trim(),
+          page_location: window.location.pathname
+        });
+      }
+    });
+  });
+
 })();
