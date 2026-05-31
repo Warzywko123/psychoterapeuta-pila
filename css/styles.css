@@ -94,11 +94,10 @@ ul { list-style: none; }
 .header {
   position: sticky;
   top: 0;
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #ffffff;
   border-bottom: 1px solid var(--color-border);
   z-index: 100;
+  padding-top: env(safe-area-inset-top);
 }
 
 .nav {
@@ -808,9 +807,12 @@ ul { list-style: none; }
 @media (max-width: 700px) {
   .nav__menu {
     position: fixed;
-    top: var(--header-height);
+    top: calc(var(--header-height) + env(safe-area-inset-top));
     left: 0;
     right: 0;
+    z-index: 99;
+    max-height: calc(100vh - var(--header-height) - env(safe-area-inset-top));
+    overflow-y: auto;
     background: white;
     flex-direction: column;
     gap: 0;
