@@ -933,23 +933,17 @@ ul { list-style: none; }
   color: var(--color-primary-dark);
 }
 
-/* --- Banner ze statystykami opinii (góra strony /opinie) --- */
-.reviews-stats-hero {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  padding: var(--space-lg) 0;
-  text-align: center;
-}
-
+/* --- Statystyki opinii w page-header (góra strony /opinie) --- */
 .reviews-stats {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  margin-top: var(--space-md);
 }
 
 .reviews-stats__stars {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   letter-spacing: 0.12em;
   line-height: 1;
   color: #fbbc04;
@@ -958,7 +952,7 @@ ul { list-style: none; }
 
 .reviews-stats__rating {
   font-family: var(--font-serif);
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 700;
   line-height: 1;
   margin: 0;
@@ -969,14 +963,14 @@ ul { list-style: none; }
 }
 
 .reviews-stats__max {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   opacity: 0.7;
   font-weight: 400;
 }
 
 .reviews-stats__count {
-  font-size: 1.125rem;
-  margin: 0.25rem 0 1rem;
+  font-size: 1rem;
+  margin: 0.25rem 0 0.875rem;
   opacity: 0.95;
 }
 
@@ -985,17 +979,16 @@ ul { list-style: none; }
 }
 
 .reviews-stats__cta {
-  font-size: 1.05rem;
-  padding: 1rem 2rem;
+  font-size: 1rem;
+  padding: 0.875rem 1.75rem;
   box-shadow: 0 4px 14px rgba(0,0,0,0.15);
 }
 
 @media (max-width: 700px) {
-  .reviews-stats__stars { font-size: 2rem; }
-  .reviews-stats__rating { font-size: 3rem; }
-  .reviews-stats__max { font-size: 1.5rem; }
-  .reviews-stats__count { font-size: 1rem; }
-  .reviews-stats-hero { padding: var(--space-md) 0; }
+  .reviews-stats__stars { font-size: 1.5rem; }
+  .reviews-stats__rating { font-size: 2.25rem; }
+  .reviews-stats__max { font-size: 1.125rem; }
+  .reviews-stats__count { font-size: 0.95rem; }
 }
 
 /* --- Notatka pod siatką opinii ("Powyższe opinie pochodzą...") --- */
