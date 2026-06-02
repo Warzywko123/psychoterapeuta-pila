@@ -249,6 +249,14 @@ ul { list-style: none; }
   margin-bottom: var(--space-sm);
 }
 
+.hero__title-sub {
+  display: block;
+  font-size: 0.55em;
+  font-weight: 500;
+  color: var(--color-text-light);
+  margin-top: 0.25em;
+}
+
 .hero__subtitle {
   font-size: 1.25rem;
   color: var(--color-text-light);
