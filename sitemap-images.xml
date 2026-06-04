@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <url>
+    <loc>https://psychoterapeuta-pila.pl/</loc>
+    <image:image>
+      <image:loc>https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg</image:loc>
+      <image:title>mgr Joanna Grochowska — psychoterapeutka w gabinecie w Pile</image:title>
+      <image:caption>Certyfikowana psychoterapeutka mgr Joanna Grochowska — Gabinet Psychoterapii DARD w Pile</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://psychoterapeuta-pila.pl/obrazy/og-image.jpg</image:loc>
+      <image:title>Gabinet Psychoterapii DARD — Open Graph cover</image:title>
+      <image:caption>Gabinet Psychoterapii DARD w Pile — okładka social media</image:caption>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://psychoterapeuta-pila.pl/o-mnie.html</loc>
+    <image:image>
+      <image:loc>https://psychoterapeuta-pila.pl/obrazy/joanna-grochowska.jpg</image:loc>
+      <image:title>mgr Joanna Grochowska — psychoterapeutka, certyfikat WTTS Poznań i PARPA Warszawa</image:title>
+      <image:caption>Joanna Grochowska, certyfikowana psychoterapeutka — wykształcenie i doświadczenie</image:caption>
+    </image:image>
+  </url>
+
+</urlset>

@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://psychoterapeuta-pila.pl/sitemap.xml
+Sitemap: https://psychoterapeuta-pila.pl/sitemap-images.xml
