@@ -1021,9 +1021,9 @@ ul { list-style: none; }
 
 .cities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.875rem;
-  max-width: 980px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
