@@ -999,6 +999,73 @@ ul { list-style: none; }
   .reviews-stats__count { font-size: 0.95rem; }
 }
 
+/* --- Cross-links: linki do innych landing pages miast --- */
+.cities-cross-links {
+  background: var(--color-bg-alt);
+  padding: var(--space-lg) 0;
+}
+
+.cities-cross-links__header {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.cities-cross-links__header h2 {
+  margin-bottom: 0.5rem;
+}
+
+.cities-cross-links__header p {
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.cities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.875rem;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.cities-grid__item {
+  background: white;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.cities-grid__item:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  color: var(--color-primary);
+}
+
+.cities-grid__pin {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.cities-grid__name {
+  font-weight: 600;
+}
+
+.cities-grid__distance {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  margin-left: auto;
+}
+
+.cities-grid__item:hover .cities-grid__distance {
+  color: var(--color-primary);
+}
+
 /* --- Notatka pod siatką opinii ("Powyższe opinie pochodzą...") --- */
 .testimonials-note {
   margin-top: 3rem;
