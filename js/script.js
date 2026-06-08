@@ -59,3 +59,33 @@
   });
 
 })();
+
+  // ----- Banner urlopowy -----
+  // Pokazuje pasek tylko w okresie 11.06.2026 - 21.06.2026
+  // Po tej dacie automatycznie się nie wyświetla
+  (function vacationBanner() {
+    const banner = document.querySelector('.vacation-banner');
+    if (!banner) return;
+
+    // Okres urlopu (start: 11.06, koniec: 21.06 do końca dnia)
+    const vacationStart = new Date('2026-06-11T00:00:00');
+    const vacationEnd = new Date('2026-06-21T23:59:59');
+    const now = new Date();
+
+    // Pokazuj tylko jeśli jesteśmy w okresie urlopu
+    if (now < vacationStart || now > vacationEnd) return;
+
+    // Sprawdź czy user już zamknął banner (sessionStorage = znika po zamknięciu zakładki)
+    const closed = sessionStorage.getItem('vacationBannerClosed');
+    if (!closed) {
+      banner.classList.add('is-visible');
+    }
+
+    const closeBtn = banner.querySelector('.vacation-banner__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        banner.classList.remove('is-visible');
+        sessionStorage.setItem('vacationBannerClosed', '1');
+      });
+    }
+  })();

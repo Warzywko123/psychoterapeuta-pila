@@ -1142,3 +1142,71 @@ ul { list-style: none; }
   justify-content: center;
   flex-wrap: wrap;
 }
+
+/* ===================================================================
+   Vacation banner — pasek informacyjny o urlopie (auto-hide po dacie)
+   =================================================================== */
+.vacation-banner {
+  display: none;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #ffffff;
+  padding: 0.75rem 3rem 0.75rem 1.25rem;
+  text-align: center;
+  position: relative;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.vacation-banner.is-visible {
+  display: block;
+}
+
+.vacation-banner__icon {
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.vacation-banner__strong {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.vacation-banner__close {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #ffffff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.vacation-banner__close:hover,
+.vacation-banner__close:focus {
+  background: rgba(255,255,255,0.25);
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .vacation-banner {
+    font-size: 0.85rem;
+    padding: 0.6rem 2.5rem 0.6rem 0.75rem;
+    line-height: 1.4;
+  }
+  .vacation-banner__strong {
+    display: block;
+    white-space: normal;
+  }
+}
