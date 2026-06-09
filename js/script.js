@@ -58,8 +58,6 @@
     });
   });
 
-})();
-
   // ----- Banner urlopowy -----
   // Pokazuje pasek tylko w okresie 11.06.2026 - 21.06.2026
   // Po tej dacie automatycznie się nie wyświetla
@@ -89,3 +87,5 @@
       });
     }
   })();
+
+})();

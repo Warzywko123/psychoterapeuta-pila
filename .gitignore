@@ -23,3 +23,6 @@ build/
 
 # Vercel
 .vercel
+
+# Generowane PDF/PNG (lokalne pliki, nie deployowane)
+kartki/

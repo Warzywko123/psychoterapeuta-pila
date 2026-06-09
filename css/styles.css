@@ -1210,3 +1210,14 @@ ul { list-style: none; }
     white-space: normal;
   }
 }
+
+/* --- Kontakt: drobne klasy zamiast inline styles --- */
+.contact-block__note {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-box__cta {
+  margin-top: 1rem;
+}
