@@ -88,4 +88,81 @@
     }
   })();
 
+  // ----- Fade-in scroll animations (Intersection Observer) -----
+  (function fadeInSections() {
+    const targets = document.querySelectorAll('.fade-in-section');
+    if (!targets.length || typeof IntersectionObserver === 'undefined') {
+      // Fallback: pokaż wszystko od razu
+      targets.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+    targets.forEach(el => observer.observe(el));
+  })();
+
+  // ----- Animated counters (data-counter) -----
+  (function animatedCounters() {
+    const counters = document.querySelectorAll('[data-counter]');
+    if (!counters.length || typeof IntersectionObserver === 'undefined') return;
+
+    const formatNumber = (val, decimals) => {
+      if (decimals > 0) return val.toFixed(decimals).replace('.', ',');
+      return Math.round(val).toString();
+    };
+
+    const animateCounter = (el) => {
+      const target = parseFloat(el.dataset.target);
+      const decimals = parseInt(el.dataset.decimals || '0', 10);
+      const suffix = el.dataset.suffix || '';
+      const duration = 1600;
+      const startTime = performance.now();
+
+      const step = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = target * eased;
+        el.textContent = formatNumber(current, decimals) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    counters.forEach(el => observer.observe(el));
+  })();
+
+  // ----- Sticky CTA — pokazuje się po przewinięciu (mobile) -----
+  (function stickyCTA() {
+    const cta = document.querySelector('.sticky-cta');
+    if (!cta) return;
+    const threshold = 400;
+    let lastVisible = false;
+    const onScroll = () => {
+      const shouldShow = window.scrollY > threshold;
+      if (shouldShow !== lastVisible) {
+        cta.classList.toggle('is-visible', shouldShow);
+        lastVisible = shouldShow;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
 })();

@@ -60,7 +60,7 @@
 
   <!-- Style -->
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="stylesheet" href="css/styles.css?v=11">
+  <link rel="stylesheet" href="css/styles.css?v=12">
 
   <!-- Dane strukturalne dla Google (Schema.org) -->
   <script type="application/ld+json">
@@ -292,6 +292,31 @@
       </div>
     </section>
 
+    <!-- ============ STATYSTYKI (animated) ============ -->
+    <section class="stats-section fade-in-section" aria-labelledby="stats-title">
+      <div class="container">
+        <h2 id="stats-title" class="stats-section__title">Gabinet DARD w&nbsp;liczbach</h2>
+        <div class="stats-grid">
+          <div class="stats-card">
+            <div class="stats-card__value" data-counter data-target="90" data-suffix="+">0</div>
+            <div class="stats-card__label">opinii pacjentów</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-card__value" data-counter data-target="5" data-decimals="1" data-suffix=" ★">0,0</div>
+            <div class="stats-card__label">średnia ocena</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-card__value" data-counter data-target="6">0</div>
+            <div class="stats-card__label">obsługiwane miasta</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-card__value" data-counter data-target="20" data-suffix="+">0</div>
+            <div class="stats-card__label">lat doświadczenia</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ OPINIE ============ -->
     <section class="section section--alt">
       <div class="container">
@@ -373,6 +398,9 @@
   </main>
 
   <!-- ============ STOPKA ============ -->
+  <a href="tel:+48501393887" class="sticky-cta" aria-label="Zadzwoń: 501 393 887">
+    📞 <span>Zadzwoń</span>
+  </a>
   <footer class="footer">
     <div class="footer__grid">
       <div>
