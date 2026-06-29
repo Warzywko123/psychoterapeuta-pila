@@ -79,4 +79,13 @@
     </image:image>
   </url>
 
+  <url>
+    <loc>https://psychoterapeuta-pila.pl/psychoterapia-dzieci.html</loc>
+    <image:image>
+      <image:loc>https://psychoterapeuta-pila.pl/obrazy/og-image.jpg</image:loc>
+      <image:title>Psycholog dziecięcy Piła — mgr Joanna Grochowska</image:title>
+      <image:caption>Psychoterapia dzieci i młodzieży w Gabinecie DARD w Pile</image:caption>
+    </image:image>
+  </url>
+
 </urlset>
