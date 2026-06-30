@@ -91,8 +91,13 @@
   // ----- Fade-in scroll animations (Intersection Observer) -----
   (function fadeInSections() {
     const targets = document.querySelectorAll('.fade-in-section');
-    if (!targets.length || typeof IntersectionObserver === 'undefined') {
-      // Fallback: pokaż wszystko od razu
+    if (!targets.length) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      targets.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
       targets.forEach(el => el.classList.add('is-visible'));
       return;
     }
@@ -103,8 +108,15 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-    targets.forEach(el => observer.observe(el));
+    }, { threshold: 0.01, rootMargin: '0px 0px 80px 0px' });
+    targets.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add('is-visible');
+      } else {
+        observer.observe(el);
+      }
+    });
   })();
 
   // ----- Animated counters (data-counter) -----
