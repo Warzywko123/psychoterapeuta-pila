@@ -368,6 +368,23 @@ ul { list-style: none; }
   line-height: 1.7;
 }
 
+.service-card__link {
+  display: inline-block;
+  margin-top: 0.85rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.service-card__link:hover,
+.service-card__link:focus {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary-dark);
+}
+
 /* --- Opinie --- */
 .testimonials-grid {
   display: grid;
