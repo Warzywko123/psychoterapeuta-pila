@@ -1346,10 +1346,3 @@ ul { list-style: none; }
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
-.cities-grid__item {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
-.cities-grid__item:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
