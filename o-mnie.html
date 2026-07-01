@@ -39,10 +39,13 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap"></noscript>
 
-  <!-- Preload hero image (AVIF) — poprawia LCP (Largest Contentful Paint) -->
-  <link rel="preload" as="image" type="image/avif" href="obrazy/joanna-grochowska.avif" fetchpriority="high">
+  <!-- Preload hero image (AVIF) — responsywny: mobile 600w / desktop 1086w -->
+  <link rel="preload" as="image" type="image/avif" href="obrazy/joanna-grochowska-mobile.avif" media="(max-width: 768px)" fetchpriority="high">
+  <link rel="preload" as="image" type="image/avif" href="obrazy/joanna-grochowska.avif" media="(min-width: 769px)" fetchpriority="high">
 
   <!-- Favicon (różne rozmiary dla różnych kontekstów) -->
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2">
@@ -217,6 +220,9 @@
     <div class="about-hero">
       <div class="about-photo">
         <picture>
+          <source media="(max-width: 768px)" srcset="obrazy/joanna-grochowska-mobile.avif" type="image/avif">
+          <source media="(max-width: 768px)" srcset="obrazy/joanna-grochowska-mobile.webp" type="image/webp">
+          <source media="(max-width: 768px)" srcset="obrazy/joanna-grochowska-mobile.jpg" type="image/jpeg">
           <source srcset="obrazy/joanna-grochowska.avif" type="image/avif">
           <source srcset="obrazy/joanna-grochowska.webp" type="image/webp">
           <img src="obrazy/joanna-grochowska.jpg" alt="mgr Joanna Grochowska — psychoterapeutka, certyfikat WTTS Poznań i PARPA Warszawa" loading="lazy" width="1086" height="1448">
