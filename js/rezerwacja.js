@@ -161,7 +161,7 @@
 
   var nameInput = document.getElementById('f-name');
   nameInput.addEventListener('input', function () {
-    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
+    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]/g, '');
   });
 
   document.getElementById('form-change-slot').addEventListener('click', function () {

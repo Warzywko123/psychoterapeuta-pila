@@ -19,6 +19,9 @@ export default async function handler(req, res) {
     if (name.length < 3 || name.length > 30 || !/\S+\s+\S+/.test(name)) {
       return j(res, 400, { error: 'Podaj imię i nazwisko.' });
     }
+    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/.test(name)) {
+      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery i spacje.' });
+    }
 
     const phone = String(b.phone || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');
     if (!/^\d{9}$/.test(phone)) {

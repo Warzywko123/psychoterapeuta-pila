@@ -36,6 +36,9 @@ export default async function handler(req, res) {
 
     const name = String(b.name || '').trim().replace(/\s+/g, ' ');
     if (name.length < 2 || name.length > 30) return j(res, 400, { error: 'Podaj imię i nazwisko pacjenta.' });
+    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/.test(name)) {
+      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery i spacje.' });
+    }
 
     let phone = String(b.phone || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');
     if (phone && !/^\d{9}$/.test(phone)) return j(res, 400, { error: 'Telefon musi mieć 9 cyfr (albo zostaw puste).' });
