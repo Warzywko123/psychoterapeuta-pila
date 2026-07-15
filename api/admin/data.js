@@ -13,14 +13,14 @@ export default async function handler(req, res) {
     const [y, m, d] = start.split('-').map(Number);
     const end = new Date(Date.UTC(y, m - 1, d + 6)).toISOString().slice(0, 10);
 
-    const bookings = await sql`SELECT id, slot_date::text AS slot_date, slot_min, name, phone, therapy, created_at
+    const bookings = await sql`SELECT id, slot_date::text AS slot_date, slot_min, name, phone, phone2, created_at
       FROM bookings WHERE status = 'confirmed' AND slot_date BETWEEN ${start} AND ${end}
       ORDER BY slot_date, slot_min`;
 
     const blocks = await sql`SELECT slot_date::text AS slot_date, slot_min FROM blocks
       WHERE slot_date BETWEEN ${start} AND ${end}`;
 
-    const upcoming = await sql`SELECT id, slot_date::text AS slot_date, slot_min, name, phone, therapy
+    const upcoming = await sql`SELECT id, slot_date::text AS slot_date, slot_min, name, phone, phone2
       FROM bookings WHERE status = 'confirmed' AND slot_date >= CURRENT_DATE
       ORDER BY slot_date, slot_min LIMIT 20`;
 

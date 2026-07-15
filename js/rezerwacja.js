@@ -145,6 +145,20 @@
     this.value = digits.slice(0, 9);
   });
 
+  var phone2Input = document.getElementById('f-phone2');
+  phone2Input.addEventListener('input', function () {
+    var digits = this.value.replace(/\D/g, '');
+    if (digits.length > 9 && digits.indexOf('48') === 0) digits = digits.slice(2); // wklejone +48
+    this.value = digits.slice(0, 9);
+  });
+
+  var phone2Toggle = document.getElementById('f-phone2-toggle');
+  var phone2Field = document.getElementById('f-phone2-field');
+  phone2Toggle.addEventListener('change', function () {
+    phone2Field.hidden = !this.checked;
+    if (!this.checked) phone2Input.value = '';
+  });
+
   var nameInput = document.getElementById('f-name');
   nameInput.addEventListener('input', function () {
     this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
@@ -172,7 +186,7 @@
       min: selected.min,
       name: document.getElementById('f-name').value,
       phone: document.getElementById('f-phone').value,
-      therapy: document.getElementById('f-therapy').value,
+      phone2: document.getElementById('f-phone2').value,
       rodo: true,
       website: document.getElementById('f-website').value,
     };

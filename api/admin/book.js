@@ -3,10 +3,8 @@
 // bez limitów IP/telefonu i bez push — wpis tworzy właściciel gabinetu.
 import {
   ensureSchema, sql, getSchedule, isValidDate, weekdayOf, slotAsUTC, warsawNowAsUTC,
-  THERAPIES, SLOT_MINUTES, requireAuth, j, readBody,
+  SLOT_MINUTES, requireAuth, j, readBody,
 } from '../_lib.js';
-
-const PHONE_THERAPY = 'Umówione telefonicznie';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return j(res, 405, { error: 'Method not allowed' });
@@ -19,9 +17,17 @@ export default async function handler(req, res) {
     const min = Number(b.min);
     if (!isValidDate(date) || !Number.isInteger(min)) return j(res, 400, { error: 'Nieprawidłowy termin.' });
 
-    const starts = (await getSchedule())[weekdayOf(date)];
-    if (!starts || !starts.includes(min)) {
-      return j(res, 400, { error: 'Termin poza godzinami przyjęć.' });
+    // custom = jednorazowy wyjątek poza stałym grafikiem (np. praca dłużej w dany dzień) —
+    // nie musi pasować do cotygodniowych godzin przyjęć, tylko do rozsądnego zakresu.
+    if (b.custom === true) {
+      if (min < 360 || min > 1380) {
+        return j(res, 400, { error: 'Godzina poza zakresem 6:00–23:00.' });
+      }
+    } else {
+      const starts = (await getSchedule())[weekdayOf(date)];
+      if (!starts || !starts.includes(min)) {
+        return j(res, 400, { error: 'Termin poza godzinami przyjęć.' });
+      }
     }
     // Dozwolona też trwająca sesja — blokujemy tylko sloty w pełni minione.
     if (slotAsUTC(date, min) + SLOT_MINUTES * 60e3 <= warsawNowAsUTC()) {
@@ -34,11 +40,9 @@ export default async function handler(req, res) {
     let phone = String(b.phone || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');
     if (phone && !/^\d{9}$/.test(phone)) return j(res, 400, { error: 'Telefon musi mieć 9 cyfr (albo zostaw puste).' });
 
-    const therapy = THERAPIES.includes(b.therapy) ? b.therapy : PHONE_THERAPY;
-
     try {
-      await sql`INSERT INTO bookings (slot_date, slot_min, name, phone, therapy)
-        VALUES (${date}, ${min}, ${name}, ${phone}, ${therapy})`;
+      await sql`INSERT INTO bookings (slot_date, slot_min, name, phone)
+        VALUES (${date}, ${min}, ${name}, ${phone})`;
     } catch (err) {
       if (err.code === '23505') return j(res, 409, { error: 'Na ten termin jest już rezerwacja.' });
       throw err;

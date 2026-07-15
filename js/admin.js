@@ -87,7 +87,7 @@
     for (var i = 0; i < 7; i++) {
       var day = new Date(state.monday); day.setDate(day.getDate() + i);
       var dateStr = fmtISO(day);
-      var starts = d.schedule[day.getDay()];
+      var starts = d.schedule[day.getDay()] || [];
 
       var card = document.createElement('div');
       card.className = 'admin-day';
@@ -96,7 +96,17 @@
       head.innerHTML = '<strong>' + DAY_NAMES[day.getDay()] + '</strong><span>' + day.getDate() + ' ' + MONTHS[day.getMonth()] + '</span>';
       card.appendChild(head);
 
-      if (!starts || !starts.length) {
+      // Sloty spoza cotygodniowego grafiku na ten konkretny dzień — jednorazowe
+      // wyjątki dodane przez "Wizyta o niestandardowej godzinie".
+      var slots = starts.map(function (m) { return { min: m, extra: false }; });
+      d.bookings.concat(d.blocks).forEach(function (b) {
+        if (b.slot_date !== dateStr || starts.indexOf(b.slot_min) !== -1) return;
+        if (slots.some(function (s) { return s.min === b.slot_min; })) return;
+        slots.push({ min: b.slot_min, extra: true });
+      });
+      slots.sort(function (a, b) { return a.min - b.min; });
+
+      if (!slots.length) {
         var off = document.createElement('div');
         off.className = 'admin-day__off';
         off.textContent = 'Nieczynne';
@@ -108,12 +118,13 @@
       var freeLeft = 0;
       var wrap = document.createElement('div');
       wrap.className = 'admin-day__slots';
-      starts.forEach(function (m) {
+      slots.forEach(function (s) {
+        var m = s.min;
         var key = dateStr + '|' + m;
         var chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'admin-slot';
-        var hh = hhmm(m);
+        var hh = hhmm(m) + (s.extra ? ' · wyjątek' : '');
 
         if (bookings[key]) {
           chip.classList.add('admin-slot--booked');
@@ -132,13 +143,13 @@
           chip.classList.add('admin-slot--free');
           chip.textContent = hh + ' · wolne';
           chip.addEventListener('click', openSlotModal.bind(null, dateStr, m));
-          freeLeft++;
+          if (!s.extra) freeLeft++;
         }
         wrap.appendChild(chip);
       });
       card.appendChild(wrap);
 
-      if (!isPast(dateStr, starts[starts.length - 1])) {
+      if (starts.length && !isPast(dateStr, starts[starts.length - 1])) {
         var dayBtn = document.createElement('button');
         dayBtn.type = 'button';
         dayBtn.className = 'admin-day__toggle';
@@ -166,7 +177,8 @@
         li.className = 'upcoming__item';
         li.innerHTML = '<strong>' + DAY_SHORT[day2.getDay()] + ' ' + String(day2.getDate()).padStart(2, '0') + '.' + String(day2.getMonth() + 1).padStart(2, '0') +
           ', ' + hhmm(b.slot_min) + '</strong> — ' + escapeHTML(b.name) +
-          ' · ' + escapeHTML(b.therapy) + ' · <a href="tel:+48' + b.phone + '">📞 ' + prettyPhone(b.phone) + '</a>';
+          ' · <a href="tel:+48' + b.phone + '">📞 ' + prettyPhone(b.phone) + '</a>' +
+          (b.phone2 ? ' · <a href="tel:+48' + b.phone2 + '">📞 ' + prettyPhone(b.phone2) + '</a>' : '');
         li.addEventListener('click', function (e) { if (e.target.tagName !== 'A') openModal(b); });
         list.appendChild(li);
       });
@@ -202,7 +214,6 @@
     $('sf-error').textContent = '';
     $('sf-name').value = '';
     $('sf-phone').value = '';
-    $('sf-therapy').value = 'Umówione telefonicznie';
     slotModal.style.display = 'flex';
   }
   function closeSlotModal() { slotModal.style.display = 'none'; pendingSlot = null; }
@@ -246,7 +257,6 @@
         min: pendingSlot.min,
         name: name,
         phone: $('sf-phone').value,
-        therapy: $('sf-therapy').value,
       }),
     }).then(function (res) {
       btn.disabled = false;
@@ -261,16 +271,72 @@
       .then(function () { load(); });
   }
 
+  // ---------- Wizyta o niestandardowej godzinie (jednorazowy wyjątek, poza grafikiem) ----------
+  var customModal = $('custom-modal');
+
+  function openCustomModal() {
+    $('cf-date').value = '';
+    $('cf-time').value = '';
+    $('cf-name').value = '';
+    $('cf-phone').value = '';
+    $('cf-error').textContent = '';
+    customModal.style.display = 'flex';
+  }
+  function closeCustomModal() { customModal.style.display = 'none'; }
+
+  $('custom-open').addEventListener('click', openCustomModal);
+  $('cf-cancel').addEventListener('click', closeCustomModal);
+  customModal.addEventListener('click', function (e) { if (e.target === customModal) closeCustomModal(); });
+
+  $('cf-name').addEventListener('input', function () {
+    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
+  });
+  $('cf-phone').addEventListener('input', function () {
+    var digits = this.value.replace(/\D/g, '');
+    if (digits.length > 9 && digits.indexOf('48') === 0) digits = digits.slice(2);
+    this.value = digits.slice(0, 9);
+  });
+
+  $('cf-save').addEventListener('click', function () {
+    var date = $('cf-date').value;
+    var time = $('cf-time').value;
+    var name = $('cf-name').value.trim();
+    if (!date) { $('cf-error').textContent = 'Wybierz datę.'; return; }
+    if (!time) { $('cf-error').textContent = 'Wybierz godzinę.'; return; }
+    if (name.length < 2) { $('cf-error').textContent = 'Podaj imię i nazwisko pacjenta.'; return; }
+    var parts = time.split(':');
+    var min = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    var btn = $('cf-save');
+    btn.disabled = true;
+    api('/api/admin/book', {
+      method: 'POST',
+      body: JSON.stringify({ date: date, min: min, name: name, phone: $('cf-phone').value, custom: true }),
+    }).then(function (res) {
+      btn.disabled = false;
+      if (!res.ok) { $('cf-error').textContent = res.body.error || 'Błąd zapisu'; return; }
+      closeCustomModal();
+      load();
+    });
+  });
+
   // ---------- Modal szczegółów ----------
   var modal = $('booking-modal');
   function openModal(b) {
     var day = parseISO(b.slot_date);
     $('modal-title').textContent = DAY_NAMES[day.getDay()] + ', ' + day.getDate() + ' ' + MONTHS[day.getMonth()] + ', godz. ' + hhmm(b.slot_min);
     $('modal-name').textContent = b.name;
-    $('modal-therapy').textContent = b.therapy;
     var tel = $('modal-phone');
     tel.textContent = '📞 ' + prettyPhone(b.phone);
     tel.href = 'tel:+48' + b.phone;
+    var tel2wrap = $('modal-phone2-wrap');
+    var tel2 = $('modal-phone2');
+    if (b.phone2) {
+      tel2.textContent = '📞 ' + prettyPhone(b.phone2) + ' (dodatkowy)';
+      tel2.href = 'tel:+48' + b.phone2;
+      tel2wrap.style.display = '';
+    } else {
+      tel2wrap.style.display = 'none';
+    }
     $('modal-cancel').onclick = function () {
       if (confirm('Odwołać tę wizytę?\n\nPAMIĘTAJ: zadzwoń do pacjenta ' + prettyPhone(b.phone) + ' i poinformuj o odwołaniu.')) {
         api('/api/admin/cancel', { method: 'POST', body: JSON.stringify({ id: b.id }) })

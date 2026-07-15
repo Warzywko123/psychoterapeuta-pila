@@ -1597,6 +1597,20 @@ ul { list-style: none; }
 
 .form-rodo input { margin-top: 0.2rem; width: 18px; height: 18px; flex-shrink: 0; }
 
+.form-toggle {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.form-toggle input { width: 18px; height: 18px; flex-shrink: 0; cursor: pointer; }
+.form-toggle label { cursor: pointer; }
+
 .booking-error {
   background: #fdecea;
   border: 1px solid #f5c6c0;

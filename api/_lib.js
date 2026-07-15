@@ -28,16 +28,6 @@ export const MAX_DAYS_AHEAD = 28;
 // Długość sesji terapeutycznej w minutach.
 export const SLOT_MINUTES = 50;
 
-export const THERAPIES = [
-  'Terapia indywidualna',
-  'Terapia par i małżeństw',
-  'Terapia rodzinna',
-  'Terapia dzieci i młodzieży',
-  'Terapia uzależnień / DDA',
-  'Terapia online',
-  'Inny temat / nie wiem',
-];
-
 // Domyślny grafik: klucz = dzień tygodnia JS (0=nd), wartość = lista początków wizyt
 // w minutach od północy (700 = 11:40) lub null (dzień bez przyjęć online).
 // Pn/wt/czw: 11:40, 12:50, 13:40, 14:30, 15:20 (sesje 50 min, przerwa 12:30–12:50).
@@ -54,7 +44,7 @@ export function ensureSchema() {
         slot_min INT NOT NULL,
         name TEXT NOT NULL,
         phone TEXT NOT NULL,
-        therapy TEXT NOT NULL,
+        therapy TEXT,
         status TEXT NOT NULL DEFAULT 'confirmed',
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
@@ -80,6 +70,10 @@ export function ensureSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
       await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS ip_hash TEXT`;
+      // Rodzaj terapii już nie jest wybierany przy rezerwacji — kolumna zostaje
+      // (stare dane), ale przestaje być wymagana. Drugi numer jest opcjonalny.
+      await sql`ALTER TABLE bookings ALTER COLUMN therapy DROP NOT NULL`;
+      await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS phone2 TEXT`;
       await sql`CREATE TABLE IF NOT EXISTS login_attempts (
         id SERIAL PRIMARY KEY,
         ip_hash TEXT NOT NULL,

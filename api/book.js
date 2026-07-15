@@ -1,7 +1,7 @@
 // POST /api/book — utworzenie rezerwacji (auto-potwierdzenie).
 import {
   ensureSchema, sql, getSchedule, isValidDate, slotBookable, weekdayOf,
-  THERAPIES, sendPushToAll, formatSlotPL, j, readBody, ipHashOf,
+  sendPushToAll, formatSlotPL, j, readBody, ipHashOf,
 } from './_lib.js';
 
 export default async function handler(req, res) {
@@ -25,8 +25,10 @@ export default async function handler(req, res) {
       return j(res, 400, { error: 'Podaj poprawny 9-cyfrowy numer telefonu.' });
     }
 
-    const therapy = String(b.therapy || '');
-    if (!THERAPIES.includes(therapy)) return j(res, 400, { error: 'Wybierz rodzaj terapii.' });
+    const phone2 = String(b.phone2 || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');
+    if (phone2 && !/^\d{9}$/.test(phone2)) {
+      return j(res, 400, { error: 'Drugi numer telefonu musi mieć 9 cyfr (albo zostaw pole puste).' });
+    }
 
     const date = b.date;
     const min = Number(b.min);
@@ -57,8 +59,8 @@ export default async function handler(req, res) {
     }
 
     try {
-      await sql`INSERT INTO bookings (slot_date, slot_min, name, phone, therapy, ip_hash)
-        VALUES (${date}, ${min}, ${name}, ${phone}, ${therapy}, ${ipHash})`;
+      await sql`INSERT INTO bookings (slot_date, slot_min, name, phone, phone2, ip_hash)
+        VALUES (${date}, ${min}, ${name}, ${phone}, ${phone2 || null}, ${ipHash})`;
     } catch (err) {
       if (err.code === '23505') {
         return j(res, 409, { error: 'Ten termin został właśnie zajęty. Wybierz inny.' });
@@ -67,7 +69,8 @@ export default async function handler(req, res) {
     }
 
     const pretty = phone.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
-    await sendPushToAll('Nowa rezerwacja — DARD', `${formatSlotPL(date, min)} · ${name} · ${therapy} · tel. ${pretty}`);
+    const pretty2 = phone2 ? ' / ' + phone2.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') : '';
+    await sendPushToAll('Nowa rezerwacja — DARD', `${formatSlotPL(date, min)} · ${name} · tel. ${pretty}${pretty2}`);
 
     j(res, 200, { ok: true });
   } catch (err) {

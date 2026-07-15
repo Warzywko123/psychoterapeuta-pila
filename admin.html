@@ -95,7 +95,7 @@
     }
 
     /* Modale */
-    #booking-modal, #slot-modal {
+    #booking-modal, #slot-modal, #custom-modal {
       display: none; position: fixed; inset: 0; background: rgba(20, 30, 45, 0.55);
       z-index: 500; align-items: center; justify-content: center; padding: 1rem;
     }
@@ -167,6 +167,14 @@
       </div>
 
       <div class="admin-card">
+        <h2>➕ Wizyta o niestandardowej godzinie</h2>
+        <p style="font-size:0.88rem; color:var(--color-text-light); margin:0 0 0.75rem;">
+          Jednorazowy wyjątek poza stałym grafikiem — np. gdy chcesz wyjątkowo popracować dłużej w danym dniu.
+          Nie zmienia grafiku cotygodniowego.</p>
+        <button type="button" id="custom-open" class="btn btn--primary" style="padding:0.6rem 1.2rem; font-size:0.95rem;">Dodaj niestandardową wizytę</button>
+      </div>
+
+      <div class="admin-card">
         <h2>🗓️ Najbliższe wizyty online</h2>
         <ul id="upcoming-list"></ul>
       </div>
@@ -206,19 +214,6 @@
             <label for="sf-phone">Telefon (opcjonalnie)</label>
             <input type="tel" id="sf-phone" placeholder="np. 600100200">
           </div>
-          <div class="form-field">
-            <label for="sf-therapy">Rodzaj terapii</label>
-            <select id="sf-therapy">
-              <option value="Umówione telefonicznie">Umówione telefonicznie</option>
-              <option value="Terapia indywidualna">Terapia indywidualna</option>
-              <option value="Terapia par i małżeństw">Terapia par i małżeństw</option>
-              <option value="Terapia rodzinna">Terapia rodzinna</option>
-              <option value="Terapia dzieci i młodzieży">Terapia dzieci i młodzieży</option>
-              <option value="Terapia uzależnień / DDA">Terapia uzależnień / DDA</option>
-              <option value="Terapia online">Terapia online</option>
-              <option value="Inny temat / nie wiem">Inny temat / nie wiem</option>
-            </select>
-          </div>
           <div id="sf-error" style="color:#a94436; font-size:0.9rem; min-height:1.2rem;"></div>
           <button type="button" id="sf-save" class="btn btn--accent" style="width:100%;">Zapisz wizytę</button>
         </div>
@@ -229,13 +224,43 @@
       </div>
     </div>
 
+    <!-- Modal: wizyta o niestandardowej godzinie (jednorazowy wyjątek, nie zmienia grafiku) -->
+    <div id="custom-modal">
+      <div class="modal-box">
+        <h3>Wizyta o niestandardowej godzinie</h3>
+        <p style="color: var(--color-text-light); font-size: 0.85rem; margin-bottom: 1rem;">
+          Jednorazowy wyjątek — nie zmienia stałego grafiku przyjęć.</p>
+        <div class="form-field">
+          <label for="cf-date">Data</label>
+          <input type="date" id="cf-date">
+        </div>
+        <div class="form-field">
+          <label for="cf-time">Godzina</label>
+          <input type="time" id="cf-time" step="300">
+        </div>
+        <div class="form-field">
+          <label for="cf-name">Imię i nazwisko pacjenta</label>
+          <input type="text" id="cf-name" placeholder="np. Anna Kowalska" maxlength="30">
+        </div>
+        <div class="form-field">
+          <label for="cf-phone">Telefon (opcjonalnie)</label>
+          <input type="tel" id="cf-phone" placeholder="np. 600100200">
+        </div>
+        <div id="cf-error" style="color:#a94436; font-size:0.9rem; min-height:1.2rem;"></div>
+        <div class="modal-actions">
+          <button type="button" id="cf-cancel" class="btn btn--outline">Anuluj</button>
+          <button type="button" id="cf-save" class="btn btn--accent">Zapisz wizytę</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal szczegółów rezerwacji -->
     <div id="booking-modal">
       <div class="modal-box">
         <h3 id="modal-title"></h3>
         <p><strong id="modal-name"></strong></p>
-        <p id="modal-therapy"></p>
         <p><a id="modal-phone" href="#"></a></p>
+        <p id="modal-phone2-wrap" style="display:none;"><a id="modal-phone2" href="#"></a></p>
         <div class="modal-actions">
           <button type="button" id="modal-close" class="btn btn--outline">Zamknij</button>
           <button type="button" id="modal-cancel" class="btn btn--danger">Odwołaj wizytę</button>
@@ -244,6 +269,6 @@
     </div>
 
   </div>
-  <script src="js/admin.js?v=2"></script>
+  <script src="js/admin.js?v=4"></script>
 </body>
 </html>
