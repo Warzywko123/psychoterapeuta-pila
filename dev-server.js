@@ -25,6 +25,10 @@ if (process.env.PGLITE_DIR && !path.isAbsolute(process.env.PGLITE_DIR)) {
   process.env.PGLITE_DIR = path.join(ROOT, process.env.PGLITE_DIR);
 }
 
+// Ta sama polityka CSP co w vercel.json — powielona tutaj, żeby dało się
+// przetestować lokalnie (dev-server nie czyta vercel.json). Trzymać w zgodzie z vercel.json.
+const CSP = "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://*.analytics.google.com; frame-src https://*.google.com";
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -70,6 +74,11 @@ async function readJSONBody(req) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = decodeURIComponent(url.pathname);
+
+  // Nagłówki bezpieczeństwa (jak vercel.json) — na potrzeby lokalnych testów CSP.
+  res.setHeader('Content-Security-Policy', CSP);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
 
   // --- API ---
   if (pathname.startsWith('/api/')) {

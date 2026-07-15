@@ -137,8 +137,10 @@ export function slotBookable(dateStr, min) {
 // --- Sesja panelu: token "exp.podpisHMAC" w ciasteczku httpOnly ---
 const COOKIE = 'dard_admin';
 
+// Prefiks 'session:' oddziela ten HMAC od hasha IP (ten sam sekret, różne przeznaczenia)
+// — separacja domenowa, żeby podpis sesji i hash IP nie dzieliły przestrzeni wartości.
 function sign(exp) {
-  return crypto.createHmac('sha256', process.env.SESSION_SECRET).update(String(exp)).digest('base64url');
+  return crypto.createHmac('sha256', process.env.SESSION_SECRET).update('session:' + exp).digest('base64url');
 }
 
 export function makeSessionCookie() {
@@ -181,7 +183,7 @@ export function clientIP(req) {
 
 // Pseudonimizowany hash IP (RODO) — nie da się odtworzyć adresu, ale można liczyć limity.
 export function ipHashOf(req) {
-  return crypto.createHmac('sha256', process.env.SESSION_SECRET).update(clientIP(req)).digest('hex').slice(0, 32);
+  return crypto.createHmac('sha256', process.env.SESSION_SECRET).update('iphash:' + clientIP(req)).digest('hex').slice(0, 32);
 }
 
 export function readBody(req) {

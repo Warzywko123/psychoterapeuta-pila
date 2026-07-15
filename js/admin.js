@@ -23,7 +23,8 @@
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
   function parseISO(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-  function prettyPhone(p) { return String(p).replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3'); }
+  function digitsOnly(p) { return String(p == null ? '' : p).replace(/\D/g, ''); }
+  function prettyPhone(p) { return digitsOnly(p).replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3'); }
   function isPast(dateStr, min) { var d = parseISO(dateStr); d.setHours(0, min, 0, 0); return d <= new Date(); }
   // 700 -> "11:40"
   function hhmm(min) {
@@ -175,10 +176,11 @@
         var day2 = parseISO(b.slot_date);
         var li = document.createElement('li');
         li.className = 'upcoming__item';
+        var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
         li.innerHTML = '<strong>' + DAY_SHORT[day2.getDay()] + ' ' + String(day2.getDate()).padStart(2, '0') + '.' + String(day2.getMonth() + 1).padStart(2, '0') +
           ', ' + hhmm(b.slot_min) + '</strong> — ' + escapeHTML(b.name) +
-          ' · <a href="tel:+48' + b.phone + '">📞 ' + prettyPhone(b.phone) + '</a>' +
-          (b.phone2 ? ' · <a href="tel:+48' + b.phone2 + '">📞 ' + prettyPhone(b.phone2) + '</a>' : '');
+          ' · <a href="tel:+48' + p1 + '">📞 ' + prettyPhone(p1) + '</a>' +
+          (p2 ? ' · <a href="tel:+48' + p2 + '">📞 ' + prettyPhone(p2) + '</a>' : '');
         li.addEventListener('click', function (e) { if (e.target.tagName !== 'A') openModal(b); });
         list.appendChild(li);
       });
@@ -325,14 +327,15 @@
     var day = parseISO(b.slot_date);
     $('modal-title').textContent = DAY_NAMES[day.getDay()] + ', ' + day.getDate() + ' ' + MONTHS[day.getMonth()] + ', godz. ' + hhmm(b.slot_min);
     $('modal-name').textContent = b.name;
+    var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
     var tel = $('modal-phone');
-    tel.textContent = '📞 ' + prettyPhone(b.phone);
-    tel.href = 'tel:+48' + b.phone;
+    tel.textContent = '📞 ' + prettyPhone(p1);
+    tel.href = 'tel:+48' + p1;
     var tel2wrap = $('modal-phone2-wrap');
     var tel2 = $('modal-phone2');
-    if (b.phone2) {
-      tel2.textContent = '📞 ' + prettyPhone(b.phone2) + ' (dodatkowy)';
-      tel2.href = 'tel:+48' + b.phone2;
+    if (p2) {
+      tel2.textContent = '📞 ' + prettyPhone(p2) + ' (dodatkowy)';
+      tel2.href = 'tel:+48' + p2;
       tel2wrap.style.display = '';
     } else {
       tel2wrap.style.display = 'none';
