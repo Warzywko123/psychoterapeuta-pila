@@ -14,8 +14,15 @@ const envFile = path.join(ROOT, '.env.local');
 if (fs.existsSync(envFile)) {
   for (const line of fs.readFileSync(envFile, 'utf8').split('\n')) {
     const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2];
+    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^"|"$/g, '');
   }
+}
+
+// PGLITE_DIR bywa ścieżką względną — jeśli proces wystartuje z innego katalogu
+// roboczego niż ROOT (np. z narzędzia podglądu), baza wylądowałaby gdzie indziej
+// (np. w katalogu domowym). Zawsze kotwiczymy ją w katalogu projektu.
+if (process.env.PGLITE_DIR && !path.isAbsolute(process.env.PGLITE_DIR)) {
+  process.env.PGLITE_DIR = path.join(ROOT, process.env.PGLITE_DIR);
 }
 
 const MIME = {
