@@ -26,3 +26,8 @@ build/
 
 # Generowane PDF/PNG (lokalne pliki, nie deployowane)
 kartki/
+.env*
+
+# Lokalna baza dev (PGlite) + node
+.pglite/
+node_modules/

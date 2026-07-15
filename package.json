@@ -1,0 +1,15 @@
+{
+  "name": "psychoterapia-pila",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4"
+  },
+  "scripts": {
+    "dev": "node dev-server.js"
+  }
+}

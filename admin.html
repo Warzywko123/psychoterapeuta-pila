@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel rezerwacji — DARD</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#2c5f8d">
+
+  <!-- PWA: dodanie do ekranu głównego iPhone'a → powiadomienia push -->
+  <link rel="manifest" href="/admin.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="DARD Panel">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2">
+
+  <link rel="stylesheet" href="css/styles.css?v=15">
+  <style>
+    body { background: var(--color-bg-alt); }
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+    .admin-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .admin-topbar h1 { font-size: 1.4rem; }
+    .admin-card {
+      background: white; border: 1px solid var(--color-border);
+      border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem;
+    }
+    .admin-card h2 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+
+    /* Logowanie */
+    #login-view { max-width: 380px; margin: 15vh auto 0; }
+    #login-view input {
+      width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--color-border);
+      border-radius: 8px; font-size: 1rem; margin-bottom: 0.75rem;
+    }
+    .login-error { color: #a94436; font-size: 0.9rem; min-height: 1.3rem; margin-bottom: 0.5rem; }
+
+    /* Kalendarz */
+    .admin-week-nav { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+    .admin-week-nav strong { font-family: var(--font-serif); color: var(--color-primary-dark); }
+    .admin-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+    @media (max-width: 1000px) { .admin-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .admin-grid { grid-template-columns: 1fr; } }
+    .admin-day { background: var(--color-bg-alt); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.6rem; }
+    .admin-day__head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem; font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .admin-day__head strong { color: var(--color-primary-dark); }
+    .admin-day__head span { color: var(--color-text-light); font-size: 0.78rem; }
+    .admin-day__off { color: var(--color-text-light); font-size: 0.85rem; text-align: center; padding: 1rem 0; }
+    .admin-day__slots { display: flex; flex-direction: column; gap: 0.3rem; }
+    .admin-slot {
+      border: none; border-radius: 6px; padding: 0.45rem 0.5rem;
+      font-size: 0.82rem; font-weight: 600; font-family: var(--font-sans);
+      text-align: left; cursor: pointer; width: 100%;
+    }
+    .admin-slot--free { background: #eaf6ee; color: #1e7a3d; }
+    .admin-slot--free:hover { background: #d3eddd; outline: 1px solid #1e7a3d33; }
+    .admin-slot--booked { background: var(--color-primary); color: white; }
+    .admin-slot--blocked { background: #f3d9d5; color: #a94436; }
+    .admin-slot--past { background: #ececec; color: #b0b0b0; cursor: default; }
+    .admin-day__toggle {
+      margin-top: 0.5rem; width: 100%; background: none; border: 1px dashed var(--color-border);
+      border-radius: 6px; padding: 0.35rem; font-size: 0.78rem; color: var(--color-text-light); cursor: pointer;
+    }
+    .admin-day__toggle:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .admin-loading { color: var(--color-text-light); padding: 1rem; }
+
+    .admin-legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.82rem; margin-bottom: 0.75rem; color: var(--color-text-light); }
+    .admin-legend span::before { content: ''; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; }
+    .legend-free::before { background: #bfe3cb; }
+    .legend-booked::before { background: var(--color-primary); }
+    .legend-blocked::before { background: #f3d9d5; }
+
+    /* Najbliższe wizyty */
+    .upcoming__item { padding: 0.6rem 0.2rem; border-bottom: 1px solid var(--color-border); font-size: 0.92rem; cursor: pointer; }
+    .upcoming__item:last-child { border-bottom: none; }
+    .upcoming__item a { font-weight: 600; }
+    .upcoming__empty { color: var(--color-text-light); font-size: 0.9rem; }
+
+    /* Godziny */
+    .hours-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.4rem 0; flex-wrap: wrap; font-size: 0.92rem; }
+    .hours-row__day { width: 110px; font-weight: 600; color: var(--color-primary-dark); }
+    .hours-row__times { flex: 1; min-width: 220px; padding: 0.35rem 0.55rem; border: 1px solid var(--color-border); border-radius: 6px; font: inherit; }
+    .hours-row__times:disabled { opacity: 0.4; background: var(--color-bg-alt); }
+    .hours-row__closed { color: var(--color-text-light); display: flex; gap: 0.35rem; align-items: center; }
+    #hours-status { margin-left: 0.75rem; color: #1e7a3d; font-weight: 600; }
+
+    /* Push */
+    #push-status { font-size: 0.92rem; margin-top: 0.5rem; }
+    #push-ios-hint {
+      display: none; background: #fff7e8; border: 1px solid #f0dcb4; border-radius: 8px;
+      padding: 0.75rem 1rem; font-size: 0.9rem; margin-top: 0.75rem; line-height: 1.55;
+    }
+
+    /* Modale */
+    #booking-modal, #slot-modal {
+      display: none; position: fixed; inset: 0; background: rgba(20, 30, 45, 0.55);
+      z-index: 500; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .slot-choice-buttons { display: flex; flex-direction: column; gap: 0.6rem; }
+    .slot-choice-buttons .btn { width: 100%; padding: 0.7rem; font-size: 0.95rem; }
+    #slot-form .form-field { margin-bottom: 0.8rem; }
+    #slot-form label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; color: var(--color-primary-dark); }
+    #slot-form input, #slot-form select {
+      width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--color-border);
+      border-radius: 8px; font-size: 0.95rem; font-family: var(--font-sans); background: white;
+    }
+    .modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 420px; width: 100%; }
+    .modal-box h3 { margin-bottom: 0.75rem; font-size: 1.05rem; }
+    .modal-box p { margin-bottom: 0.4rem; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .modal-actions .btn { flex: 1; padding: 0.6rem; font-size: 0.92rem; }
+    .btn--danger { background: #c0392b; color: white; border: none; }
+    .btn--danger:hover { background: #a93226; color: white; }
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+
+    <!-- Logowanie -->
+    <div id="login-view" style="display:none;">
+      <div class="admin-card">
+        <h2 style="text-align:center;">🔐 Panel rezerwacji DARD</h2>
+        <form id="login-form">
+          <input type="password" id="login-password" placeholder="Hasło" autocomplete="current-password" required>
+          <div class="login-error" id="login-error"></div>
+          <button type="submit" class="btn btn--primary" style="width:100%;">Zaloguj</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Aplikacja -->
+    <div id="app-view" style="display:none;">
+      <div class="admin-topbar">
+        <h1>📅 Panel rezerwacji</h1>
+        <button type="button" id="logout-btn" class="btn btn--outline" style="padding:0.4rem 0.9rem; font-size:0.85rem;">Wyloguj</button>
+      </div>
+
+      <div class="admin-card">
+        <h2>🔔 Powiadomienia na tym urządzeniu</h2>
+        <button type="button" id="push-enable" class="btn btn--accent" style="padding:0.6rem 1.2rem; font-size:0.95rem;">Włącz powiadomienia</button>
+        <div id="push-status"></div>
+        <div id="push-ios-hint">
+          <strong>iPhone — jak włączyć powiadomienia:</strong><br>
+          1. Otwórz tę stronę w Safari<br>
+          2. Dotknij przycisku <strong>Udostępnij</strong> (kwadrat ze strzałką)<br>
+          3. Wybierz <strong>„Do ekranu początkowego”</strong> i zatwierdź<br>
+          4. Otwórz aplikację <strong>DARD Panel</strong> z ekranu głównego<br>
+          5. Zaloguj się i dotknij „Włącz powiadomienia”
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-week-nav">
+          <button type="button" id="week-prev" class="btn btn--outline" style="padding:0.4rem 0.8rem; font-size:0.85rem;">←</button>
+          <strong id="week-label"></strong>
+          <button type="button" id="week-next" class="btn btn--outline" style="padding:0.4rem 0.8rem; font-size:0.85rem;">→</button>
+        </div>
+        <div class="admin-legend">
+          <span class="legend-free">wolny (dotknij = wpisz pacjenta / blokada)</span>
+          <span class="legend-booked">rezerwacja (dotknij = szczegóły)</span>
+          <span class="legend-blocked">blokada (dotknij = odblokuj)</span>
+        </div>
+        <div class="admin-grid" id="admin-grid"></div>
+      </div>
+
+      <div class="admin-card">
+        <h2>🗓️ Najbliższe wizyty online</h2>
+        <ul id="upcoming-list"></ul>
+      </div>
+
+      <div class="admin-card">
+        <h2>⏰ Godziny przyjęć (rezerwacje online)</h2>
+        <p style="font-size:0.88rem; color:var(--color-text-light); margin:0 0 0.5rem;">
+          Wpisz godziny <strong>rozpoczęcia</strong> wizyt, oddzielone przecinkami (każda sesja trwa 50 minut) —
+          np. <code>11:40, 12:50, 13:40, 14:30, 15:20</code>.</p>
+        <div id="hours-editor"></div>
+        <div style="margin-top:0.75rem;">
+          <button type="button" id="hours-save" class="btn btn--primary" style="padding:0.5rem 1.2rem; font-size:0.9rem;">Zapisz godziny</button>
+          <span id="hours-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal wolnego slotu: wpisz pacjenta telefonicznego / zablokuj -->
+    <div id="slot-modal">
+      <div class="modal-box">
+        <h3 id="slot-modal-title"></h3>
+
+        <div id="slot-choice">
+          <p style="color: var(--color-text-light); font-size: 0.92rem; margin-bottom: 1rem;">Co zrobić z tym terminem?</p>
+          <div class="slot-choice-buttons">
+            <button type="button" id="slot-add-patient" class="btn btn--primary">➕ Wpisz pacjenta (tel.)</button>
+            <button type="button" id="slot-block" class="btn btn--outline">🚫 Zablokuj termin</button>
+          </div>
+        </div>
+
+        <div id="slot-form" style="display:none;">
+          <div class="form-field">
+            <label for="sf-name">Imię i nazwisko pacjenta</label>
+            <input type="text" id="sf-name" placeholder="np. Anna Kowalska" maxlength="30">
+          </div>
+          <div class="form-field">
+            <label for="sf-phone">Telefon (opcjonalnie)</label>
+            <input type="tel" id="sf-phone" placeholder="np. 600100200">
+          </div>
+          <div class="form-field">
+            <label for="sf-therapy">Rodzaj terapii</label>
+            <select id="sf-therapy">
+              <option value="Umówione telefonicznie">Umówione telefonicznie</option>
+              <option value="Terapia indywidualna">Terapia indywidualna</option>
+              <option value="Terapia par i małżeństw">Terapia par i małżeństw</option>
+              <option value="Terapia rodzinna">Terapia rodzinna</option>
+              <option value="Terapia dzieci i młodzieży">Terapia dzieci i młodzieży</option>
+              <option value="Terapia uzależnień / DDA">Terapia uzależnień / DDA</option>
+              <option value="Terapia online">Terapia online</option>
+              <option value="Inny temat / nie wiem">Inny temat / nie wiem</option>
+            </select>
+          </div>
+          <div id="sf-error" style="color:#a94436; font-size:0.9rem; min-height:1.2rem;"></div>
+          <button type="button" id="sf-save" class="btn btn--accent" style="width:100%;">Zapisz wizytę</button>
+        </div>
+
+        <div class="modal-actions" style="margin-top:0.9rem;">
+          <button type="button" id="slot-close" class="btn btn--outline" style="width:100%;">Anuluj</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal szczegółów rezerwacji -->
+    <div id="booking-modal">
+      <div class="modal-box">
+        <h3 id="modal-title"></h3>
+        <p><strong id="modal-name"></strong></p>
+        <p id="modal-therapy"></p>
+        <p><a id="modal-phone" href="#"></a></p>
+        <div class="modal-actions">
+          <button type="button" id="modal-close" class="btn btn--outline">Zamknij</button>
+          <button type="button" id="modal-cancel" class="btn btn--danger">Odwołaj wizytę</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/admin.js?v=2"></script>
+</body>
+</html>
