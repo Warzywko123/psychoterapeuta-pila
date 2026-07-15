@@ -58,6 +58,26 @@
     });
   });
 
+  // ----- Banner o rezerwacji online -----
+  // Widoczny dopóki ktoś go nie zamknie (zapamiętane trwale, nie znika co sesję).
+  (function announceBanner() {
+    const banner = document.querySelector('.announce-banner');
+    if (!banner) return;
+
+    const closed = localStorage.getItem('announceBannerClosed');
+    if (!closed) {
+      banner.classList.add('is-visible');
+    }
+
+    const closeBtn = banner.querySelector('.announce-banner__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        banner.classList.remove('is-visible');
+        localStorage.setItem('announceBannerClosed', '1');
+      });
+    }
+  })();
+
   // ----- Banner urlopowy -----
   // Pokazuje pasek tylko w okresie 11.06.2026 - 21.06.2026
   // Po tej dacie automatycznie się nie wyświetla
