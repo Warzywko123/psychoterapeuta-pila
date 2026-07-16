@@ -125,6 +125,9 @@
         <h2 style="text-align:center;">🔐 Panel rezerwacji DARD</h2>
         <form id="login-form">
           <input type="password" id="login-password" placeholder="Hasło" autocomplete="current-password" required>
+          <!-- Pole 2FA ukryte do czasu aktywacji dwuetapowej weryfikacji (patrz scripts/gen-totp.cjs).
+               Gdy włączamy 2FA: usuń style="display:none" i ustaw ADMIN_TOTP_SECRET w Vercel. -->
+          <input type="text" id="login-totp" placeholder="Kod z aplikacji (6 cyfr)" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" style="display:none">
           <div class="login-error" id="login-error"></div>
           <button type="submit" class="btn btn--primary" style="width:100%;">Zaloguj</button>
         </form>
@@ -261,6 +264,13 @@
         <p><strong id="modal-name"></strong></p>
         <p><a id="modal-phone" href="#"></a></p>
         <p id="modal-phone2-wrap" style="display:none;"><a id="modal-phone2" href="#"></a></p>
+        <p id="modal-confirm-status" style="font-size:0.92rem; margin-top:0.3rem;"></p>
+        <div class="modal-actions">
+          <a id="modal-sms" class="btn btn--primary" href="#">✉️ Wyślij SMS z prośbą o potwierdzenie</a>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="modal-confirm" class="btn btn--outline">✅ Oznacz jako potwierdzoną</button>
+        </div>
         <div class="modal-actions">
           <button type="button" id="modal-close" class="btn btn--outline">Zamknij</button>
           <button type="button" id="modal-cancel" class="btn btn--danger">Odwołaj wizytę</button>
@@ -269,6 +279,6 @@
     </div>
 
   </div>
-  <script src="js/admin.js?v=6"></script>
+  <script src="js/admin.js?v=8"></script>
 </body>
 </html>

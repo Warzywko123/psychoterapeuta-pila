@@ -74,6 +74,8 @@ export function ensureSchema() {
       // (stare dane), ale przestaje być wymagana. Drugi numer jest opcjonalny.
       await sql`ALTER TABLE bookings ALTER COLUMN therapy DROP NOT NULL`;
       await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS phone2 TEXT`;
+      // Ręczne potwierdzenie wizyty przez pacjenta (mama zaznacza po odpowiedzi SMS).
+      await sql`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS patient_confirmed BOOLEAN NOT NULL DEFAULT false`;
       await sql`CREATE TABLE IF NOT EXISTS login_attempts (
         id SERIAL PRIMARY KEY,
         ip_hash TEXT NOT NULL,
@@ -189,6 +191,42 @@ export function ipHashOf(req) {
 export function readBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   try { return JSON.parse(req.body || '{}'); } catch { return {}; }
+}
+
+// --- 2FA: TOTP (RFC 6238), zgodny z Google Authenticator ---
+// Sekret w base32 (env ADMIN_TOTP_SECRET). Kod 6-cyfrowy, okno 30 s, HMAC-SHA1.
+// Zasada: z sekretu + numeru bieżącego 30-sekundowego okna liczymy 6 cyfr;
+// aplikacja mamy liczy to samo niezależnie — jeśli kody się zgadzają, wpuszczamy.
+function base32Decode(str) {
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const clean = String(str).toUpperCase().replace(/[^A-Z2-7]/g, '');
+  let bits = '';
+  for (const ch of clean) bits += A.indexOf(ch).toString(2).padStart(5, '0');
+  const bytes = [];
+  for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
+  return Buffer.from(bytes);
+}
+
+function totpCode(secretBuf, counter) {
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64BE(BigInt(counter)); // numer okna jako 64-bit big-endian
+  const h = crypto.createHmac('sha1', secretBuf).update(buf).digest();
+  const off = h[h.length - 1] & 0x0f; // dynamiczne obcięcie (RFC 4226)
+  const bin = ((h[off] & 0x7f) << 24) | (h[off + 1] << 16) | (h[off + 2] << 8) | h[off + 3];
+  return String(bin % 1_000_000).padStart(6, '0');
+}
+
+// Sprawdza kod z tolerancją ±1 okno (30 s w tył/przód) na wypadek rozjazdu zegara.
+export function verifyTOTP(secretB32, code) {
+  const clean = String(code || '').replace(/\D/g, '');
+  if (clean.length !== 6 || !secretB32) return false;
+  const secret = base32Decode(secretB32);
+  const counter = Math.floor(Date.now() / 1000 / 30);
+  for (let w = -1; w <= 1; w++) {
+    const good = totpCode(secret, counter + w);
+    if (crypto.timingSafeEqual(Buffer.from(good), Buffer.from(clean))) return true;
+  }
+  return false;
 }
 
 // --- Web Push do wszystkich zapisanych urządzeń (mama + Tymon) ---

@@ -40,10 +40,11 @@
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault();
     loginError.textContent = '';
-    api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: $('login-password').value }) })
+    api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: $('login-password').value, totp: $('login-totp').value }) })
       .then(function (res) {
         if (!res.ok) { loginError.textContent = res.body.error || 'Błąd logowania'; return; }
         $('login-password').value = '';
+        $('login-totp').value = '';
         showApp();
       });
   });
@@ -177,7 +178,8 @@
         var li = document.createElement('li');
         li.className = 'upcoming__item';
         var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
-        li.innerHTML = '<strong>' + DAY_SHORT[day2.getDay()] + ' ' + String(day2.getDate()).padStart(2, '0') + '.' + String(day2.getMonth() + 1).padStart(2, '0') +
+        li.innerHTML = (b.patient_confirmed ? '✅ ' : '') +
+          '<strong>' + DAY_SHORT[day2.getDay()] + ' ' + String(day2.getDate()).padStart(2, '0') + '.' + String(day2.getMonth() + 1).padStart(2, '0') +
           ', ' + hhmm(b.slot_min) + '</strong> — ' + escapeHTML(b.name) +
           ' · <a href="tel:+48' + p1 + '">📞 ' + prettyPhone(p1) + '</a>' +
           (p2 ? ' · <a href="tel:+48' + p2 + '">📞 ' + prettyPhone(p2) + '</a>' : '');
@@ -321,6 +323,14 @@
     });
   });
 
+  // Treść SMS z prośbą o potwierdzenie (data/godzina z rezerwacji, reszta stała).
+  function smsBody(b) {
+    var day = parseISO(b.slot_date);
+    var dataStr = DAY_SHORT[day.getDay()] + ' ' + String(day.getDate()).padStart(2, '0') + '.' + String(day.getMonth() + 1).padStart(2, '0');
+    return 'Proszę o potwierdzenie lub odwołanie wizyty (' + dataStr + ', godz. ' + hhmm(b.slot_min) +
+      ') w Gabinet Psychoterapii DARD, Al. Wojska Polskiego 49b, pok. 124, Piła. Odpowiedz SMS-em TAK lub NIE. J. Grochowska';
+  }
+
   // ---------- Modal szczegółów ----------
   var modal = $('booking-modal');
   function openModal(b) {
@@ -340,6 +350,36 @@
     } else {
       tel2wrap.style.display = 'none';
     }
+
+    // Status potwierdzenia przez pacjenta
+    $('modal-confirm-status').textContent = b.patient_confirmed
+      ? '✅ Potwierdzona przez pacjenta'
+      : '⏳ Oczekuje na potwierdzenie';
+    $('modal-confirm-status').style.color = b.patient_confirmed ? '#1e7a3d' : 'var(--color-text-light)';
+
+    // Przycisk „Wyślij SMS" — otwiera apkę SMS z gotową treścią (tylko gdy jest numer)
+    var smsBtn = $('modal-sms');
+    if (p1) {
+      smsBtn.href = 'sms:+48' + p1 + '?body=' + encodeURIComponent(smsBody(b));
+      smsBtn.style.display = '';
+    } else {
+      smsBtn.style.display = 'none';
+    }
+
+    // Przycisk „Oznacz jako potwierdzoną" / „Cofnij potwierdzenie" (przełącznik)
+    var confBtn = $('modal-confirm');
+    confBtn.textContent = b.patient_confirmed ? '↺ Cofnij potwierdzenie' : '✅ Oznacz jako potwierdzoną';
+    confBtn.onclick = function () {
+      confBtn.disabled = true;
+      api('/api/admin/confirm', { method: 'POST', body: JSON.stringify({ id: b.id, confirmed: !b.patient_confirmed }) })
+        .then(function (res) {
+          confBtn.disabled = false;
+          if (!res.ok) { alert(res.body.error || 'Błąd'); return; }
+          closeModal();
+          load();
+        });
+    };
+
     $('modal-cancel').onclick = function () {
       if (confirm('Odwołać tę wizytę?\n\nPAMIĘTAJ: zadzwoń do pacjenta ' + prettyPhone(b.phone) + ' i poinformuj o odwołaniu.')) {
         api('/api/admin/cancel', { method: 'POST', body: JSON.stringify({ id: b.id }) })
