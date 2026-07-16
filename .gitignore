@@ -31,3 +31,6 @@ kartki/
 # Lokalna baza dev (PGlite) + node
 .pglite/
 node_modules/
+
+# Wewnętrzne notatki marketingowe (nie publikować)
+posty-gbp.md
