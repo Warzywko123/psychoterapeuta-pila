@@ -126,9 +126,7 @@
         <h2 style="text-align:center;">🔐 Panel rezerwacji DARD</h2>
         <form id="login-form">
           <input type="password" id="login-password" placeholder="Hasło" autocomplete="current-password" required>
-          <!-- Pole 2FA ukryte do czasu aktywacji dwuetapowej weryfikacji (patrz scripts/gen-totp.cjs).
-               Gdy włączamy 2FA: usuń style="display:none" i ustaw ADMIN_TOTP_SECRET w Vercel. -->
-          <input type="text" id="login-totp" placeholder="Kod z aplikacji (6 cyfr)" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" style="display:none">
+          <input type="text" id="login-totp" placeholder="Kod z aplikacji (6 cyfr)" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*">
           <div class="login-error" id="login-error"></div>
           <button type="submit" class="btn btn--primary" style="width:100%;">Zaloguj</button>
         </form>
