@@ -130,6 +130,8 @@
 
         if (bookings[key]) {
           chip.classList.add('admin-slot--booked');
+          // Potwierdzona przez pacjenta → zielony kafelek zamiast granatowego.
+          if (bookings[key].patient_confirmed) chip.classList.add('admin-slot--confirmed');
           chip.textContent = hh + ' · ' + bookings[key].name.split(' ')[0];
           chip.addEventListener('click', openModal.bind(null, bookings[key]));
         } else if (blocks[key]) {
