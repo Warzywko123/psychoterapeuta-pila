@@ -58,6 +58,30 @@
     });
   });
 
+  // ----- Śledzenie kliknięć w rezerwację online (GA4) -----
+  // Wysyła event "reservation_click" gdy ktoś przechodzi do rezerwacji.
+  // Pomijamy kliknięcia wykonane już na samej stronie rezerwacji (link w menu
+  // prowadzi wtedy do tej samej strony), żeby nie zawyżać konwersji.
+  if (!/rezerwacja\.html$/.test(window.location.pathname)) {
+    document.querySelectorAll('a[href*="rezerwacja.html"]').forEach(link => {
+      link.addEventListener('click', function() {
+        if (typeof gtag !== 'function') return;
+
+        let linkLocation = 'inne';
+        if (this.closest('.announce-banner')) linkLocation = 'baner';
+        else if (this.closest('.nav')) linkLocation = 'menu';
+        else if (this.closest('.hero')) linkLocation = 'hero';
+        else if (this.closest('footer')) linkLocation = 'stopka';
+
+        gtag('event', 'reservation_click', {
+          link_text: this.textContent.trim(),
+          link_location: linkLocation,
+          page_location: window.location.pathname
+        });
+      });
+    });
+  }
+
   // ----- Banner o rezerwacji online -----
   // Widoczny dopóki ktoś go nie zamknie (zapamiętane trwale, nie znika co sesję).
   (function announceBanner() {
