@@ -12,7 +12,7 @@
   var appView = $('app-view');
   var loginError = $('login-error');
 
-  var state = { monday: startOfWeek(new Date()), data: null };
+  var state = { monday: startOfWeek(new Date()), data: null, query: '' };
 
   function startOfWeek(d) {
     var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -175,28 +175,86 @@
     if (!d.upcoming.length) {
       list.innerHTML = '<li class="upcoming__empty">Brak nadchodzących rezerwacji online.</li>';
     } else {
-      d.upcoming.forEach(function (b) {
-        var day2 = parseISO(b.slot_date);
-        var li = document.createElement('li');
-        li.className = 'upcoming__item';
-        var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
-        li.innerHTML = (b.patient_confirmed ? '✅ ' : '') +
-          '<strong>' + DAY_SHORT[day2.getDay()] + ' ' + String(day2.getDate()).padStart(2, '0') + '.' + String(day2.getMonth() + 1).padStart(2, '0') +
-          ', ' + hhmm(b.slot_min) + '</strong> — ' + escapeHTML(b.name) +
-          ' · <a href="tel:+48' + p1 + '">📞 ' + prettyPhone(p1) + '</a>' +
-          (p2 ? ' · <a href="tel:+48' + p2 + '">📞 ' + prettyPhone(p2) + '</a>' : '');
-        li.addEventListener('click', function (e) { if (e.target.tagName !== 'A') openModal(b); });
-        list.appendChild(li);
-      });
+      d.upcoming.forEach(function (b) { list.appendChild(bookingItem(b, false)); });
     }
 
     renderHoursEditor(d.schedule);
+  }
+
+  // Wiersz „data · pacjent · telefony", klikalny (poza samymi numerami) → szczegóły wizyty.
+  // Wspólny dla najbliższych wizyt i wyników szukania; withYear dla starszych terminów.
+  function bookingItem(b, withYear) {
+    var day = parseISO(b.slot_date);
+    var date = DAY_SHORT[day.getDay()] + ' ' + String(day.getDate()).padStart(2, '0') + '.' +
+      String(day.getMonth() + 1).padStart(2, '0') + (withYear ? '.' + day.getFullYear() : '');
+    var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
+    var li = document.createElement('li');
+    li.className = 'upcoming__item' + (b.status === 'cancelled' ? ' search-item__cancelled' : '');
+    li.innerHTML = (b.status === 'cancelled' ? '❌ ' : b.patient_confirmed ? '✅ ' : '') +
+      '<strong>' + date + ', ' + hhmm(b.slot_min) + '</strong> — ' + escapeHTML(b.name) +
+      (p1 ? ' · <a href="tel:+48' + p1 + '">📞 ' + prettyPhone(p1) + '</a>' : '') +
+      (p2 ? ' · <a href="tel:+48' + p2 + '">📞 ' + prettyPhone(p2) + '</a>' : '');
+    li.addEventListener('click', function (e) { if (e.target.tagName !== 'A') openModal(b); });
+    return li;
   }
 
   function escapeHTML(s) {
     var div = document.createElement('div');
     div.textContent = s;
     return div.innerHTML;
+  }
+
+  // ---------- Szukanie pacjenta (imię, nazwisko lub telefon) ----------
+  // Zapytanie leci dopiero 300 ms po ostatnim znaku, żeby nie odpytywać serwera co literę.
+  var searchTimer = null;
+  var searchSeq = 0; // numer zapytania — starsza odpowiedź, która wróci później, jest ignorowana
+
+  $('search-input').addEventListener('input', function () {
+    var q = this.value.trim();
+    clearTimeout(searchTimer);
+    state.query = q;
+    if (q.length < 2) {
+      $('search-results').innerHTML = '';
+      $('search-status').textContent = q ? 'Wpisz co najmniej 2 znaki.' : '';
+      return;
+    }
+    $('search-status').textContent = 'Szukam…';
+    searchTimer = setTimeout(runSearch, 300);
+  });
+
+  function refreshSearch() {
+    if (state.query && state.query.length >= 2) runSearch();
+  }
+
+  function runSearch() {
+    var q = state.query;
+    var seq = ++searchSeq;
+    api('/api/admin/search?q=' + encodeURIComponent(q)).then(function (res) {
+      if (seq !== searchSeq || q !== state.query) return;
+      if (res.status === 401) { appView.style.display = 'none'; loginView.style.display = 'block'; return; }
+      if (!res.ok) { $('search-status').textContent = 'Błąd: ' + (res.body.error || res.status); return; }
+
+      var box = $('search-results');
+      box.innerHTML = '';
+      var total = res.body.upcoming.length + res.body.past.length;
+      $('search-status').textContent = total
+        ? 'Znaleziono: ' + total + (total === 30 + 30 ? ' (pokazuję najważniejsze)' : '')
+        : 'Nic nie znalazłem dla „' + q + '”.';
+
+      addSearchGroup(box, 'Nadchodzące', res.body.upcoming, false);
+      addSearchGroup(box, 'Wizyty, które już się odbyły', res.body.past, true);
+    });
+  }
+
+  function addSearchGroup(box, label, rows, withYear) {
+    if (!rows.length) return;
+    var head = document.createElement('div');
+    head.className = 'search-group__label';
+    head.textContent = label;
+    box.appendChild(head);
+    var ul = document.createElement('ul');
+    rows.forEach(function (b) { ul.appendChild(bookingItem(b, withYear)); });
+    box.appendChild(ul);
   }
 
   function doBlock(date, min, action) {
@@ -353,15 +411,22 @@
       tel2wrap.style.display = 'none';
     }
 
+    // Odwołana wizyta (można na nią trafić z wyszukiwarki) — tylko podgląd, bez akcji.
+    var cancelled = b.status === 'cancelled';
+
     // Status potwierdzenia przez pacjenta
-    $('modal-confirm-status').textContent = b.patient_confirmed
-      ? '✅ Potwierdzona przez pacjenta'
-      : '⏳ Oczekuje na potwierdzenie';
-    $('modal-confirm-status').style.color = b.patient_confirmed ? '#1e7a3d' : 'var(--color-text-light)';
+    $('modal-confirm-status').textContent = cancelled
+      ? '❌ Wizyta odwołana'
+      : b.patient_confirmed ? '✅ Potwierdzona przez pacjenta' : '⏳ Oczekuje na potwierdzenie';
+    $('modal-confirm-status').style.color = cancelled ? '#a94436'
+      : b.patient_confirmed ? '#1e7a3d' : 'var(--color-text-light)';
+
+    $('modal-confirm').style.display = cancelled ? 'none' : '';
+    $('modal-cancel').style.display = cancelled ? 'none' : '';
 
     // Przycisk „Wyślij SMS" — otwiera apkę SMS z gotową treścią (tylko gdy jest numer)
     var smsBtn = $('modal-sms');
-    if (p1) {
+    if (p1 && !cancelled) {
       smsBtn.href = 'sms:+48' + p1 + '?body=' + encodeURIComponent(smsBody(b));
       smsBtn.style.display = '';
     } else {
@@ -379,6 +444,7 @@
           if (!res.ok) { alert(res.body.error || 'Błąd'); return; }
           closeModal();
           load();
+          refreshSearch();
         });
     };
 
@@ -389,6 +455,7 @@
             closeModal();
             if (!res.ok) alert(res.body.error || 'Błąd');
             load();
+            refreshSearch();
           });
       }
     };

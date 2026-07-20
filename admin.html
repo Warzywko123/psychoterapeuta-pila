@@ -80,6 +80,18 @@
     .upcoming__item a { font-weight: 600; }
     .upcoming__empty { color: var(--color-text-light); font-size: 0.9rem; }
 
+    /* Szukanie pacjenta */
+    #search-input {
+      width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--color-border);
+      border-radius: 8px; font-size: 1rem; font-family: var(--font-sans);
+    }
+    #search-status { font-size: 0.88rem; color: var(--color-text-light); min-height: 1.3rem; margin-top: 0.5rem; }
+    .search-group__label {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--color-text-light); margin: 0.9rem 0 0.2rem;
+    }
+    .search-item__cancelled { opacity: 0.5; }
+
     /* Godziny */
     .hours-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.4rem 0; flex-wrap: wrap; font-size: 0.92rem; }
     .hours-row__day { width: 110px; font-weight: 600; color: var(--color-primary-dark); }
@@ -174,6 +186,16 @@
           Jednorazowy wyjątek poza stałym grafikiem — np. gdy chcesz wyjątkowo popracować dłużej w danym dniu.
           Nie zmienia grafiku cotygodniowego.</p>
         <button type="button" id="custom-open" class="btn btn--primary" style="padding:0.6rem 1.2rem; font-size:0.95rem;">Dodaj niestandardową wizytę</button>
+      </div>
+
+      <div class="admin-card">
+        <h2>🔍 Szukaj pacjenta</h2>
+        <p style="font-size:0.88rem; color:var(--color-text-light); margin:0 0 0.6rem;">
+          Wpisz imię, nazwisko albo numer telefonu — wystarczy fragment. Przeszukam wszystkie wizyty,
+          także te, które już się odbyły.</p>
+        <input type="search" id="search-input" placeholder="np. Kowalska albo 600100" autocomplete="off" maxlength="60">
+        <div id="search-status"></div>
+        <div id="search-results"></div>
       </div>
 
       <div class="admin-card">
@@ -278,6 +300,6 @@
     </div>
 
   </div>
-  <script src="js/admin.js?v=9"></script>
+  <script src="js/admin.js?v=10"></script>
 </body>
 </html>
