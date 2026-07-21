@@ -93,14 +93,29 @@ export function ensureSchema() {
   return schemaReady;
 }
 
-// Retencja RODO: rezerwacje znikają 12 miesięcy po terminie wizyty.
-// Uruchamiane raz na dobę przez /api/cron/cleanup — wcześniej wisiało przy każdym
-// zimnym starcie i wydłużało pierwsze wejście do panelu.
+// Retencja RODO: dane rezerwacji znikają 7 dni po terminie wizyty. Warunek na
+// slot_date < dziś - 7 dni dotyczy WYŁĄCZNIE minionych wizyt — przyszłe rezerwacje
+// (umówione nawet 4 tygodnie naprzód) są nietknięte. Uruchamiane raz na dobę przez
+// zaplanowane zadanie (patrz vercel.json) — wcześniej wisiało przy każdym zimnym
+// starcie i wydłużało pierwsze wejście do panelu.
 export async function purgeOldData() {
-  const bookings = await sql`DELETE FROM bookings WHERE slot_date < CURRENT_DATE - INTERVAL '365 days' RETURNING id`;
+  const bookings = await sql`DELETE FROM bookings WHERE slot_date < CURRENT_DATE - INTERVAL '7 days' RETURNING id`;
   const blocks = await sql`DELETE FROM blocks WHERE slot_date < CURRENT_DATE - INTERVAL '60 days' RETURNING id`;
   const attempts = await sql`DELETE FROM login_attempts WHERE attempted_at < now() - INTERVAL '1 day' RETURNING id`;
   return { bookings: bookings.length, blocks: blocks.length, loginAttempts: attempts.length };
+}
+
+// Autoryzacja zaplanowanego zadania. Gdy ustawiony jest CRON_SECRET, Vercel dokłada
+// do wywołań crona nagłówek "Authorization: Bearer <CRON_SECRET>". Porównanie w czasie
+// stałym; brak sekretu = odmowa (fail closed). NIE ufamy nagłówkowi x-vercel-cron —
+// jest w pełni podrabialny przez klienta, a repozytorium jest publiczne, więc każdy
+// znałby ścieżkę crona i mógłby wywołać kasowanie danych.
+export function isCronAuthorized(req) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  const given = Buffer.from(req.headers.authorization || '');
+  const good = Buffer.from(`Bearer ${secret}`);
+  return given.length === good.length && crypto.timingSafeEqual(given, good);
 }
 
 // Grafik przyjęć: {dzieńTygodnia: [minutyStartu...] | null}.
@@ -202,8 +217,15 @@ export function ipHashOf(req) {
 }
 
 export function readBody(req) {
-  if (req.body && typeof req.body === 'object') return req.body;
-  try { return JSON.parse(req.body || '{}'); } catch { return {}; }
+  // Uwaga: samo odczytanie req.body bywa getterem, który parsuje treść i RZUCA
+  // przy niepoprawnym JSON — dlatego cały dostęp jest w try (inaczej handler
+  // zwracał 500 zamiast kontrolowanego 400 dla śmieciowych żądań botów).
+  try {
+    if (req.body && typeof req.body === 'object') return req.body;
+    return JSON.parse(req.body || '{}');
+  } catch {
+    return {};
+  }
 }
 
 // --- 2FA: TOTP (RFC 6238), zgodny z Google Authenticator ---
