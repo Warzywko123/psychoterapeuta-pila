@@ -3,7 +3,7 @@
   "trailingSlash": false,
   "crons": [
     {
-      "path": "/api/cron/cleanup",
+      "path": "/api/admin/data?cron=cleanup",
       "schedule": "0 3 * * *"
     }
   ],

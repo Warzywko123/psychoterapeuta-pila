@@ -1,8 +1,31 @@
 // GET /api/admin/data?start=YYYY-MM-DD — dane tygodnia dla panelu (wymaga sesji).
-import { ensureSchema, sql, getSchedule, isValidDate, weekdayOf, requireAuth, j } from '../_lib.js';
+// GET /api/admin/data?cron=cleanup — sprzątanie wg retencji RODO (Vercel Cron, raz na dobę).
+import { ensureSchema, sql, getSchedule, isValidDate, weekdayOf, requireAuth, purgeOldData, j } from '../_lib.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return j(res, 405, { error: 'Method not allowed' });
+
+  // Sprzątanie doklejone tutaj, a nie jako osobna funkcja, bo plan Hobby dopuszcza
+  // najwyżej 12 funkcji na wdrożenie — a tyle już mamy. Kasowane są wyłącznie dane
+  // przeterminowane (wizyty >365 dni, blokady >60 dni, próby logowania >1 doba),
+  // więc wywołanie nie rusza świeżych prób logowania i nie osłabia limitu logowań.
+  if (req.query.cron === 'cleanup') {
+    const secret = process.env.CRON_SECRET;
+    const fromCron = secret
+      ? req.headers.authorization === `Bearer ${secret}`
+      : req.headers['x-vercel-cron'] === '1';
+    if (!fromCron) return j(res, 401, { error: 'Brak uprawnień' });
+    try {
+      await ensureSchema();
+      const removed = await purgeOldData();
+      console.log('cleanup RODO:', removed);
+      return j(res, 200, { ok: true, removed });
+    } catch (err) {
+      console.error('cleanup error:', err);
+      return j(res, 500, { error: 'Błąd serwera' });
+    }
+  }
+
   if (!requireAuth(req, res)) return;
   try {
     await ensureSchema();
