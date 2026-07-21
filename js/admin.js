@@ -56,20 +56,20 @@
     });
   });
 
-  function showApp() {
+  // alreadyLoaded = dane tygodnia są już pobrane (wejście z istniejącą sesją),
+  // więc nie odpytujemy serwera drugi raz o to samo.
+  function showApp(alreadyLoaded) {
     loginView.style.display = 'none';
     appView.style.display = 'block';
-    load();
+    if (!alreadyLoaded) load();
     initPushUI();
   }
 
   // ---------- Dane tygodnia ----------
   function load() {
-    var mon = state.monday;
-    var end = new Date(mon); end.setDate(end.getDate() + 5);
-    $('week-label').textContent = mon.getDate() + ' ' + MONTHS[mon.getMonth()] + ' – ' + end.getDate() + ' ' + MONTHS[end.getMonth()];
+    setWeekLabel();
     $('admin-grid').innerHTML = '<p class="admin-loading">Ładowanie…</p>';
-    api('/api/admin/data?start=' + fmtISO(mon)).then(function (res) {
+    api('/api/admin/data?start=' + fmtISO(state.monday)).then(function (res) {
       if (res.status === 401) { appView.style.display = 'none'; loginView.style.display = 'block'; return; }
       if (!res.ok) { $('admin-grid').innerHTML = '<p class="admin-loading">Błąd: ' + (res.body.error || res.status) + '</p>'; return; }
       state.data = res.body;
@@ -77,8 +77,18 @@
     });
   }
 
+  // Nagłówek „20 lipca – 25 lipca" — osobno, bo ustawiamy go od razu po zmianie tygodnia
+  // (natychmiastowa reakcja na strzałkę), a nie dopiero gdy wrócą dane z serwera.
+  function setWeekLabel() {
+    var mon = state.monday;
+    var end = new Date(mon); end.setDate(end.getDate() + 5);
+    $('week-label').textContent = mon.getDate() + ' ' + MONTHS[mon.getMonth()] + ' – ' + end.getDate() + ' ' + MONTHS[end.getMonth()];
+  }
+
   function render() {
     var d = state.data;
+    setWeekLabel();
+
     var bookings = {}, blocks = {};
     d.bookings.forEach(function (b) { bookings[b.slot_date + '|' + b.slot_min] = b; });
     d.blocks.forEach(function (b) { blocks[b.slot_date + '|' + b.slot_min] = true; });
@@ -594,9 +604,16 @@
     });
   }
 
+  // Service worker trzyma w pamięci telefonu pliki panelu (HTML/CSS/JS), więc kolejne
+  // otwarcia nie czekają na ich pobranie. Rejestrujemy niezależnie od powiadomień —
+  // cache przydaje się też tam, gdzie push nie działa (np. Safari poza trybem PWA).
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function () { /* brak cache to nie błąd krytyczny */ });
+  }
+
   // ---------- Start: próba wejścia (sesja może już istnieć) ----------
   api('/api/admin/data?start=' + fmtISO(state.monday)).then(function (res) {
-    if (res.ok) { state.data = res.body; showApp(); render(); }
+    if (res.ok) { state.data = res.body; showApp(true); render(); }
     else { loginView.style.display = 'block'; }
   });
 })();

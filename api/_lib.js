@@ -38,6 +38,13 @@ let schemaReady;
 export function ensureSchema() {
   if (!schemaReady) {
     schemaReady = (async () => {
+      // Budowanie schematu ma sens tylko przy pustej bazie: lokalny PGlite albo jednorazowa
+      // migracja po zmianie struktury (ustaw MIGRATE=1 w zmiennych środowiskowych, wejdź
+      // do panelu, skasuj zmienną). W produkcji tabele istnieją od dawna, a te kilkanaście
+      // zapytań DDL wykonywało się przy każdym zimnym starcie funkcji i opóźniało
+      // pierwsze wejście do panelu o ~1,5 s.
+      if (!process.env.PGLITE_DIR && process.env.MIGRATE !== '1') return;
+
       await sql`CREATE TABLE IF NOT EXISTS bookings (
         id SERIAL PRIMARY KEY,
         slot_date DATE NOT NULL,
@@ -81,13 +88,19 @@ export function ensureSchema() {
         ip_hash TEXT NOT NULL,
         attempted_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )`;
-      // Retencja RODO: rezerwacje znikają 12 miesięcy po terminie wizyty.
-      await sql`DELETE FROM bookings WHERE slot_date < CURRENT_DATE - INTERVAL '365 days'`;
-      await sql`DELETE FROM blocks WHERE slot_date < CURRENT_DATE - INTERVAL '60 days'`;
-      await sql`DELETE FROM login_attempts WHERE attempted_at < now() - INTERVAL '1 day'`;
     })();
   }
   return schemaReady;
+}
+
+// Retencja RODO: rezerwacje znikają 12 miesięcy po terminie wizyty.
+// Uruchamiane raz na dobę przez /api/cron/cleanup — wcześniej wisiało przy każdym
+// zimnym starcie i wydłużało pierwsze wejście do panelu.
+export async function purgeOldData() {
+  const bookings = await sql`DELETE FROM bookings WHERE slot_date < CURRENT_DATE - INTERVAL '365 days' RETURNING id`;
+  const blocks = await sql`DELETE FROM blocks WHERE slot_date < CURRENT_DATE - INTERVAL '60 days' RETURNING id`;
+  const attempts = await sql`DELETE FROM login_attempts WHERE attempted_at < now() - INTERVAL '1 day' RETURNING id`;
+  return { bookings: bookings.length, blocks: blocks.length, loginAttempts: attempts.length };
 }
 
 // Grafik przyjęć: {dzieńTygodnia: [minutyStartu...] | null}.
