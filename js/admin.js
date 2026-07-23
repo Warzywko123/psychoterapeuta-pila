@@ -611,6 +611,38 @@
     navigator.serviceWorker.register('/sw.js').catch(function () { /* brak cache to nie błąd krytyczny */ });
   }
 
+  // ---------- Odświeżanie po powrocie do aplikacji ----------
+  // Panel pobiera dane tylko przy otwarciu, zmianie tygodnia i po własnej akcji.
+  // iPhone/iPad trzyma PWA „zamrożoną" w tle i po powrocie pokazuje starą wersję,
+  // przez co dwa urządzenia widziały różne dane. Tutaj przy każdym powrocie panel
+  // po cichu dociąga aktualny grafik z serwera.
+  var refreshing = false, lastRefresh = 0;
+  function quietRefresh() {
+    if (appView.style.display !== 'block') return; // tylko gdy zalogowana i panel widoczny
+    // Nie wyrywaj danych spod ręki, gdy mama jest w trakcie akcji w oknie dialogowym.
+    if (modal.style.display === 'flex' || slotModal.style.display === 'flex' || customModal.style.display === 'flex') return;
+    var now = Date.now();
+    if (refreshing || now - lastRefresh < 2000) return; // bez podwójnych i zbyt częstych odświeżeń
+    refreshing = true; lastRefresh = now;
+    // Ciche pobranie — bez migania „Ładowanie…"; błąd sieci zostawia bieżący widok bez zmian.
+    api('/api/admin/data?start=' + fmtISO(state.monday)).then(function (res) {
+      refreshing = false;
+      if (res.status === 401) { appView.style.display = 'none'; loginView.style.display = 'block'; return; }
+      if (!res.ok) return;
+      state.data = res.body;
+      render();
+      refreshSearch();
+    }).catch(function () { refreshing = false; });
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') quietRefresh();
+  });
+  // iOS potrafi przywrócić stronę z pamięci bez przeładowania — pageshow z persisted
+  // to łapie. Warunek persisted pomija zwykłe pierwsze wejście (start sam już pobiera
+  // dane — bez tego byłoby zbędne, podwójne zapytanie na starcie).
+  window.addEventListener('pageshow', function (e) { if (e.persisted) quietRefresh(); });
+
   // ---------- Start: próba wejścia (sesja może już istnieć) ----------
   api('/api/admin/data?start=' + fmtISO(state.monday)).then(function (res) {
     if (res.ok) { state.data = res.body; showApp(true); render(); }
