@@ -1,5 +1,6 @@
 // GET /api/admin/search?q=... — szukanie pacjenta po imieniu/nazwisku lub telefonie (wymaga sesji).
-// Przeszukuje całą tabelę (retencja RODO i tak kasuje wpisy starsze niż 12 miesięcy).
+// Przeszukuje całą tabelę. Uwaga: retencja RODO (purgeOldData w _lib.js) kasuje rezerwacje
+// 7 dni po terminie wizyty, więc w historii są tylko wizyty z mniej więcej ostatniego tygodnia.
 import { ensureSchema, sql, requireAuth, j } from '../_lib.js';
 
 export default async function handler(req, res) {

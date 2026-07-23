@@ -166,6 +166,10 @@ export function slotBookable(dateStr, min) {
 
 // --- Sesja panelu: token "exp.podpisHMAC" w ciasteczku httpOnly ---
 const COOKIE = 'dard_admin';
+// Ważność sesji panelu. Po tylu dniach ciasteczko wygasa i trzeba zalogować się ponownie
+// (skrócenie z 90 → 30 dni ogranicza okno użycia przechwyconego ciasteczka — panel z danymi
+// o zdrowiu). „Wyloguj wszystkich" natychmiast = zmiana SESSION_SECRET w zmiennych środowiskowych.
+const SESSION_DAYS = 30;
 
 // Prefiks 'session:' oddziela ten HMAC od hasha IP (ten sam sekret, różne przeznaczenia)
 // — separacja domenowa, żeby podpis sesji i hash IP nie dzieliły przestrzeni wartości.
@@ -174,8 +178,8 @@ function sign(exp) {
 }
 
 export function makeSessionCookie() {
-  const exp = Date.now() + 90 * 86400e3;
-  return `${COOKIE}=${exp}.${sign(exp)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${90 * 86400}`;
+  const exp = Date.now() + SESSION_DAYS * 86400e3;
+  return `${COOKIE}=${exp}.${sign(exp)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`;
 }
 
 export const clearSessionCookie = () => `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
