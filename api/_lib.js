@@ -64,6 +64,16 @@ export function ensureSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
         UNIQUE (slot_date, slot_min)
       )`;
+      // Jednorazowe wolne okienka poza stałym grafikiem: konkretna data + godzina,
+      // którą właściciel gabinetu udostępnia do rezerwacji online tylko raz (odwrotność
+      // blokady). Publiczny /api/slots dokłada je do dnia, /api/book pozwala je zająć.
+      await sql`CREATE TABLE IF NOT EXISTS extra_slots (
+        id SERIAL PRIMARY KEY,
+        slot_date DATE NOT NULL,
+        slot_min INT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (slot_date, slot_min)
+      )`;
       await sql`CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value JSONB NOT NULL
@@ -101,8 +111,11 @@ export function ensureSchema() {
 export async function purgeOldData() {
   const bookings = await sql`DELETE FROM bookings WHERE slot_date < CURRENT_DATE - INTERVAL '7 days' RETURNING id`;
   const blocks = await sql`DELETE FROM blocks WHERE slot_date < CURRENT_DATE - INTERVAL '60 days' RETURNING id`;
+  // Minione jednorazowe okienka, których nikt nie zajął, są już bezużyteczne (nie zawierają
+  // danych osobowych — to zwykłe sprzątanie, nie wymóg RODO).
+  const extra = await sql`DELETE FROM extra_slots WHERE slot_date < CURRENT_DATE RETURNING id`;
   const attempts = await sql`DELETE FROM login_attempts WHERE attempted_at < now() - INTERVAL '1 day' RETURNING id`;
-  return { bookings: bookings.length, blocks: blocks.length, loginAttempts: attempts.length };
+  return { bookings: bookings.length, blocks: blocks.length, extraSlots: extra.length, loginAttempts: attempts.length };
 }
 
 // Autoryzacja zaplanowanego zadania. Gdy ustawiony jest CRON_SECRET, Vercel dokłada

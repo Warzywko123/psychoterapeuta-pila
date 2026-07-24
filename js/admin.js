@@ -108,15 +108,23 @@
       head.innerHTML = '<strong>' + DAY_NAMES[day.getDay()] + '</strong><span>' + day.getDate() + ' ' + MONTHS[day.getMonth()] + '</span>';
       card.appendChild(head);
 
-      // Sloty spoza cotygodniowego grafiku na ten konkretny dzień — jednorazowe
-      // wyjątki dodane przez "Wizyta o niestandardowej godzinie".
-      var slots = starts.map(function (m) { return { min: m, extra: false }; });
-      d.bookings.concat(d.blocks).forEach(function (b) {
-        if (b.slot_date !== dateStr || starts.indexOf(b.slot_min) !== -1) return;
-        if (slots.some(function (s) { return s.min === b.slot_min; })) return;
-        slots.push({ min: b.slot_min, extra: true });
+      // Lista slotów dnia = stały grafik + wyjątki na tę konkretną datę:
+      //  · isExtra → dodane ręcznie wolne okienko (extra_slots): puste, można je usunąć,
+      //  · extra   → dowolna godzina spoza grafiku (też wpisany pacjent / blokada o nietypowej porze).
+      var slotMeta = {};
+      starts.forEach(function (m) { slotMeta[m] = { fromSchedule: true, fromExtra: false }; });
+      (d.extraSlots || []).forEach(function (e) {
+        if (e.slot_date !== dateStr) return;
+        if (!slotMeta[e.slot_min]) slotMeta[e.slot_min] = { fromSchedule: false, fromExtra: false };
+        slotMeta[e.slot_min].fromExtra = true;
       });
-      slots.sort(function (a, b) { return a.min - b.min; });
+      d.bookings.concat(d.blocks).forEach(function (b) {
+        if (b.slot_date !== dateStr || slotMeta[b.slot_min]) return;
+        slotMeta[b.slot_min] = { fromSchedule: false, fromExtra: false };
+      });
+      var slots = Object.keys(slotMeta).map(function (m) {
+        return { min: +m, extra: !slotMeta[m].fromSchedule, isExtra: slotMeta[m].fromExtra };
+      }).sort(function (a, b) { return a.min - b.min; });
 
       if (!slots.length) {
         var off = document.createElement('div');
@@ -153,6 +161,12 @@
           chip.classList.add('admin-slot--past');
           chip.textContent = hh;
           chip.disabled = true;
+        } else if (s.isExtra) {
+          // Puste okienko dodane ręcznie — dotknięcie usuwa je (patrz removeExtraSlot).
+          chip.classList.add('admin-slot--free', 'admin-slot--extra');
+          chip.textContent = hhmm(m) + ' · okienko ✕';
+          chip.title = 'Dodane wolne okienko — dotknij, aby usunąć';
+          chip.addEventListener('click', removeExtraSlot.bind(null, dateStr, m));
         } else {
           chip.classList.add('admin-slot--free');
           chip.textContent = hh + ' · wolne';
@@ -275,6 +289,14 @@
       });
   }
 
+  // Usunięcie dodanego wcześniej wolnego okienka (zanim ktoś je zajmie).
+  function removeExtraSlot(date, min) {
+    var day = parseISO(date);
+    var when = DAY_NAMES[day.getDay()] + ', ' + day.getDate() + ' ' + MONTHS[day.getMonth()] + ', godz. ' + hhmm(min);
+    if (!confirm('Usunąć dodane wolne okienko?\n\n' + when + '\n\nZniknie z rezerwacji online.')) return;
+    doBlock(date, min, 'extra-remove');
+  }
+
   // ---------- Wolny slot: wybór akcji (wpisz pacjenta telefonicznego / blokada) ----------
   var slotModal = $('slot-modal');
   var pendingSlot = null;
@@ -389,6 +411,41 @@
       btn.disabled = false;
       if (!res.ok) { $('cf-error').textContent = res.body.error || 'Błąd zapisu'; return; }
       closeCustomModal();
+      load();
+    });
+  });
+
+  // ---------- Jednorazowe wolne okienko (poza grafikiem, do rezerwacji przez pacjenta) ----------
+  var extraModal = $('extra-modal');
+
+  function openExtraModal() {
+    $('ef-date').value = '';
+    $('ef-time').value = '';
+    $('ef-error').textContent = '';
+    extraModal.style.display = 'flex';
+  }
+  function closeExtraModal() { extraModal.style.display = 'none'; }
+
+  $('extra-open').addEventListener('click', openExtraModal);
+  $('ef-cancel').addEventListener('click', closeExtraModal);
+  extraModal.addEventListener('click', function (e) { if (e.target === extraModal) closeExtraModal(); });
+
+  $('ef-save').addEventListener('click', function () {
+    var date = $('ef-date').value;
+    var time = $('ef-time').value;
+    if (!date) { $('ef-error').textContent = 'Wybierz datę.'; return; }
+    if (!time) { $('ef-error').textContent = 'Wybierz godzinę.'; return; }
+    var parts = time.split(':');
+    var min = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    var btn = $('ef-save');
+    btn.disabled = true;
+    api('/api/admin/block', {
+      method: 'POST',
+      body: JSON.stringify({ date: date, min: min, action: 'extra-add' }),
+    }).then(function (res) {
+      btn.disabled = false;
+      if (!res.ok) { $('ef-error').textContent = res.body.error || 'Błąd zapisu'; return; }
+      closeExtraModal();
       load();
     });
   });
@@ -620,7 +677,7 @@
   function quietRefresh() {
     if (appView.style.display !== 'block') return; // tylko gdy zalogowana i panel widoczny
     // Nie wyrywaj danych spod ręki, gdy mama jest w trakcie akcji w oknie dialogowym.
-    if (modal.style.display === 'flex' || slotModal.style.display === 'flex' || customModal.style.display === 'flex') return;
+    if (modal.style.display === 'flex' || slotModal.style.display === 'flex' || customModal.style.display === 'flex' || extraModal.style.display === 'flex') return;
     var now = Date.now();
     if (refreshing || now - lastRefresh < 2000) return; // bez podwójnych i zbyt częstych odświeżeń
     refreshing = true; lastRefresh = now;

@@ -37,8 +37,14 @@ export default async function handler(req, res) {
     const min = Number(b.min);
     if (!isValidDate(date) || !Number.isInteger(min)) return j(res, 400, { error: 'Nieprawidłowy termin.' });
 
-    const starts = (await getSchedule())[weekdayOf(date)];
-    if (!starts || !starts.includes(min) || !slotBookable(date, min)) {
+    const starts = (await getSchedule())[weekdayOf(date)] || [];
+    let allowed = starts.includes(min);
+    if (!allowed) {
+      // Poza stałym grafikiem termin da się zająć tylko, jeśli to jednorazowe wolne okienko.
+      const extra = await sql`SELECT 1 FROM extra_slots WHERE slot_date = ${date} AND slot_min = ${min}`;
+      allowed = extra.length > 0;
+    }
+    if (!allowed || !slotBookable(date, min)) {
       return j(res, 400, { error: 'Ten termin nie jest dostępny do rezerwacji online.' });
     }
 

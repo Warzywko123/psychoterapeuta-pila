@@ -28,9 +28,20 @@ export default async function handler(req, res) {
       taken.add(`${r.slot_date}|${r.slot_min}`);
     }
 
+    // Jednorazowe wolne okienka poza stałym grafikiem — mapa data -> zbiór minut startu.
+    const extraRows = await sql`SELECT slot_date::text AS slot_date, slot_min FROM extra_slots
+      WHERE slot_date BETWEEN ${start} AND ${end}`;
+    const extraByDate = new Map();
+    for (const r of extraRows) {
+      if (!extraByDate.has(r.slot_date)) extraByDate.set(r.slot_date, new Set());
+      extraByDate.get(r.slot_date).add(r.slot_min);
+    }
+
     const days = dates.map((date) => {
-      const starts = schedule[weekdayOf(date)];
-      const slots = (starts || []).map((min) => ({
+      const starts = schedule[weekdayOf(date)] || [];
+      // Grafik stały + jednorazowe okienka na ten dzień, bez duplikatów, rosnąco.
+      const mins = [...new Set([...starts, ...(extraByDate.get(date) || [])])].sort((a, b) => a - b);
+      const slots = mins.map((min) => ({
         min,
         time: minToHHMM(min),
         available: slotBookable(date, min) && !taken.has(`${date}|${min}`),

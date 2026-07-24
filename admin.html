@@ -57,6 +57,8 @@
     }
     .admin-slot--free { background: #eaf6ee; color: #1e7a3d; }
     .admin-slot--free:hover { background: #d3eddd; outline: 1px solid #1e7a3d33; }
+    /* Dodane ręcznie wolne okienko (poza stałym grafikiem) — z ramką, żeby odróżnić od zwykłego wolnego. */
+    .admin-slot--extra { box-shadow: inset 0 0 0 1.5px #1e7a3d66; }
     .admin-slot--booked { background: var(--color-primary); color: white; }
     .admin-slot--confirmed { background: #1e7a3d; color: white; }
     .admin-slot--blocked { background: #f3d9d5; color: #a94436; }
@@ -73,6 +75,7 @@
     .legend-free::before { background: #bfe3cb; }
     .legend-booked::before { background: var(--color-primary); }
     .legend-blocked::before { background: #f3d9d5; }
+    .legend-extra::before { background: #eaf6ee; box-shadow: inset 0 0 0 1.5px #1e7a3d; }
 
     /* Najbliższe wizyty */
     .upcoming__item { padding: 0.6rem 0.2rem; border-bottom: 1px solid var(--color-border); font-size: 0.92rem; cursor: pointer; }
@@ -108,7 +111,7 @@
     }
 
     /* Modale */
-    #booking-modal, #slot-modal, #custom-modal {
+    #booking-modal, #slot-modal, #custom-modal, #extra-modal {
       display: none; position: fixed; inset: 0; background: rgba(20, 30, 45, 0.55);
       z-index: 500; align-items: center; justify-content: center; padding: 1rem;
     }
@@ -176,8 +179,17 @@
           <span class="legend-free">wolny (dotknij = wpisz pacjenta / blokada)</span>
           <span class="legend-booked">rezerwacja (dotknij = szczegóły)</span>
           <span class="legend-blocked">blokada (dotknij = odblokuj)</span>
+          <span class="legend-extra">dodane okienko (dotknij = usuń)</span>
         </div>
         <div class="admin-grid" id="admin-grid"></div>
+      </div>
+
+      <div class="admin-card">
+        <h2>🟢 Dodaj jednorazowe wolne okienko</h2>
+        <p style="font-size:0.88rem; color:var(--color-text-light); margin:0 0 0.75rem;">
+          Pojedynczy wolny termin poza stałym grafikiem — pojawi się w rezerwacji online, a pacjent sam się na niego umówi.
+          Nie zmienia grafiku cotygodniowego. Dodane okienka widać w kalendarzu wyżej (z zieloną ramką) — dotknij, aby usunąć.</p>
+        <button type="button" id="extra-open" class="btn btn--primary" style="padding:0.6rem 1.2rem; font-size:0.95rem;">Dodaj wolne okienko</button>
       </div>
 
       <div class="admin-card">
@@ -274,6 +286,29 @@
         <div class="modal-actions">
           <button type="button" id="cf-cancel" class="btn btn--outline">Anuluj</button>
           <button type="button" id="cf-save" class="btn btn--accent">Zapisz wizytę</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: jednorazowe wolne okienko (poza grafikiem, do samodzielnej rezerwacji przez pacjenta) -->
+    <div id="extra-modal">
+      <div class="modal-box">
+        <h3>Dodaj jednorazowe wolne okienko</h3>
+        <p style="color: var(--color-text-light); font-size: 0.85rem; margin-bottom: 1rem;">
+          Wolny termin poza stałym grafikiem — pacjent zobaczy go w rezerwacji online i sam się umówi.
+          Nie zmienia grafiku cotygodniowego.</p>
+        <div class="form-field">
+          <label for="ef-date">Data</label>
+          <input type="date" id="ef-date">
+        </div>
+        <div class="form-field">
+          <label for="ef-time">Godzina rozpoczęcia</label>
+          <input type="time" id="ef-time" step="300">
+        </div>
+        <div id="ef-error" style="color:#a94436; font-size:0.9rem; min-height:1.2rem;"></div>
+        <div class="modal-actions">
+          <button type="button" id="ef-cancel" class="btn btn--outline">Anuluj</button>
+          <button type="button" id="ef-save" class="btn btn--accent">Dodaj okienko</button>
         </div>
       </div>
     </div>

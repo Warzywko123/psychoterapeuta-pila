@@ -38,6 +38,10 @@ export default async function handler(req, res) {
     const blocks = await sql`SELECT slot_date::text AS slot_date, slot_min FROM blocks
       WHERE slot_date BETWEEN ${start} AND ${end}`;
 
+    // Jednorazowe wolne okienka poza stałym grafikiem — panel rysuje je jako wolne sloty.
+    const extraSlots = await sql`SELECT slot_date::text AS slot_date, slot_min FROM extra_slots
+      WHERE slot_date BETWEEN ${start} AND ${end}`;
+
     const upcoming = await sql`SELECT id, slot_date::text AS slot_date, slot_min, name, phone, phone2, patient_confirmed
       FROM bookings WHERE status = 'confirmed' AND slot_date >= CURRENT_DATE
       ORDER BY slot_date, slot_min LIMIT 20`;
@@ -46,6 +50,7 @@ export default async function handler(req, res) {
       schedule: await getSchedule(),
       bookings,
       blocks,
+      extraSlots,
       upcoming,
       vapidPublicKey: process.env.VAPID_PUBLIC_KEY || null,
     });
