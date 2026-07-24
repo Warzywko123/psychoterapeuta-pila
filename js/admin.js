@@ -162,11 +162,11 @@
           chip.textContent = hh;
           chip.disabled = true;
         } else if (s.isExtra) {
-          // Puste okienko dodane ręcznie — dotknięcie usuwa je (patrz removeExtraSlot).
+          // Puste okienko dodane ręcznie — dotknięcie otwiera wybór: wpisz pacjenta / usuń.
           chip.classList.add('admin-slot--free', 'admin-slot--extra');
-          chip.textContent = hhmm(m) + ' · okienko ✕';
-          chip.title = 'Dodane wolne okienko — dotknij, aby usunąć';
-          chip.addEventListener('click', removeExtraSlot.bind(null, dateStr, m));
+          chip.textContent = hhmm(m) + ' · okienko';
+          chip.title = 'Dodane wolne okienko — wpisz pacjenta (tel.) lub usuń';
+          chip.addEventListener('click', openSlotModal.bind(null, dateStr, m, true));
         } else {
           chip.classList.add('admin-slot--free');
           chip.textContent = hh + ' · wolne';
@@ -301,10 +301,12 @@
   var slotModal = $('slot-modal');
   var pendingSlot = null;
 
-  function openSlotModal(date, min) {
-    pendingSlot = { date: date, min: min };
+  function openSlotModal(date, min, isExtra) {
+    pendingSlot = { date: date, min: min, isExtra: !!isExtra };
     var day = parseISO(date);
     $('slot-modal-title').textContent = DAY_NAMES[day.getDay()] + ', ' + day.getDate() + ' ' + MONTHS[day.getMonth()] + ', godz. ' + hhmm(min);
+    // Dla dodanego okienka drugi przycisk usuwa je; dla zwykłego wolnego slotu — blokuje.
+    $('slot-block').textContent = isExtra ? '🗑️ Usuń okienko' : '🚫 Zablokuj termin';
     $('slot-choice').style.display = 'block';
     $('slot-form').style.display = 'none';
     $('sf-error').textContent = '';
@@ -321,7 +323,8 @@
     if (!pendingSlot) return;
     var s = pendingSlot;
     closeSlotModal();
-    doBlock(s.date, s.min, 'block');
+    if (s.isExtra) removeExtraSlot(s.date, s.min);
+    else doBlock(s.date, s.min, 'block');
   });
 
   $('slot-add-patient').addEventListener('click', function () {
@@ -346,14 +349,17 @@
     if (name.length < 2) { $('sf-error').textContent = 'Podaj imię i nazwisko pacjenta.'; return; }
     var btn = $('sf-save');
     btn.disabled = true;
+    var body = {
+      date: pendingSlot.date,
+      min: pendingSlot.min,
+      name: name,
+      phone: $('sf-phone').value,
+    };
+    // Okienko jest poza stałym grafikiem — book przyjmie je tylko z flagą custom.
+    if (pendingSlot.isExtra) body.custom = true;
     api('/api/admin/book', {
       method: 'POST',
-      body: JSON.stringify({
-        date: pendingSlot.date,
-        min: pendingSlot.min,
-        name: name,
-        phone: $('sf-phone').value,
-      }),
+      body: JSON.stringify(body),
     }).then(function (res) {
       btn.disabled = false;
       if (!res.ok) { $('sf-error').textContent = res.body.error || 'Błąd zapisu'; return; }
