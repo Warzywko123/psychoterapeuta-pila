@@ -51,8 +51,13 @@ export default async function handler(req, res) {
         return j(res, 400, { error: 'Godzina poza zakresem 6:00–23:00.' });
       }
       if (action === 'extra-add') {
-        // Nie dubluj godziny, która już jest w stałym grafiku tego dnia.
+        // Okienko tylko w dzień, w którym gabinet i tak przyjmuje (dodatkowa godzina),
+        // nie w dni wolne — w niedzielę/dzień nieczynny strona rezerwacji i tak by go nie pokazała.
         const starts = (await getSchedule())[weekdayOf(date)] || [];
+        if (!starts.length) {
+          return j(res, 400, { error: 'W ten dzień gabinet jest nieczynny — okienko można dodać tylko w dzień przyjęć.' });
+        }
+        // Nie dubluj godziny, która już jest w stałym grafiku tego dnia.
         if (starts.includes(m)) {
           return j(res, 409, { error: 'Ta godzina jest już w stałym grafiku tego dnia.' });
         }
