@@ -113,15 +113,15 @@ a {
 }
 a:hover { color: var(--color-primary-dark); }
 
-h1, h2, h3, h4 {
+h1, h2, .h2, h3, .h3, h4 {
   font-family: var(--font-serif);
   font-weight: 600;
   line-height: 1.2;
   color: var(--color-primary-dark);
 }
 h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
-h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
-h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); }
+h2, .h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+h3, .h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); }
 h4 { font-size: 1.125rem; }
 
 ul { list-style: none; }
@@ -486,7 +486,7 @@ ul { list-style: none; }
   padding: var(--space-xl) 0;
 }
 
-.cta-section h2 { color: white; margin-bottom: var(--space-sm); }
+.cta-section h2, .cta-section .h2 { color: white; margin-bottom: var(--space-sm); }
 
 .cta-section p {
   font-size: 1.125rem;
@@ -625,7 +625,7 @@ ul { list-style: none; }
   border-left-color: var(--color-accent);
 }
 
-.credentials h3 {
+.credentials h3, .credentials .h3 {
   font-family: var(--font-sans);
   font-size: 1rem;
   text-transform: uppercase;
@@ -917,12 +917,12 @@ ul { list-style: none; }
   line-height: 1.8;
 }
 
-.prose h2 {
+.prose h2, .prose .h2 {
   margin-top: var(--space-md);
   margin-bottom: var(--space-sm);
 }
 
-.prose h3 {
+.prose h3, .prose .h3 {
   margin-top: var(--space-md);
   margin-bottom: 0.5rem;
 }
@@ -1154,7 +1154,7 @@ ul { list-style: none; }
   margin-bottom: var(--space-md);
 }
 
-.cities-cross-links__header h2 {
+.cities-cross-links__header h2, .cities-cross-links__header .h2 {
   margin-bottom: 0.5rem;
 }
 
@@ -1761,7 +1761,7 @@ ul { list-style: none; }
   margin: var(--space-md) auto 0;
 }
 
-.booking-success h3 { color: #1e7a3d; margin-bottom: 0.5rem; }
+.booking-success h3, .booking-success .h3 { color: #1e7a3d; margin-bottom: 0.5rem; }
 .booking-success p { color: var(--color-text); margin-bottom: 0.5rem; }
 
 .honeypot { position: absolute; left: -9999px; opacity: 0; height: 0; overflow: hidden; }
@@ -1876,4 +1876,25 @@ ul { list-style: none; }
 
 @media (max-width: 640px) {
   .booking-info { grid-template-columns: 1fr; }
+}
+
+/* === Obszar dotyku drobnych linków (WCAG 2.2, kryterium 2.5.8 — min. 24×24 px) ===
+   Numery telefonu i okruszki mają wysokość ~17-20 px, czyli trudno w nie trafić
+   palcem. Nakładka ::after powiększa TYLKO obszar klikalny — układ strony i wygląd
+   zostają bez zmian. */
+.contact-block__value a,
+.page-header__breadcrumb a,
+.announce-banner__link {
+  position: relative;
+}
+.contact-block__value a::after,
+.page-header__breadcrumb a::after,
+.announce-banner__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 28px;
 }
