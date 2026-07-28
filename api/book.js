@@ -16,11 +16,13 @@ export default async function handler(req, res) {
     if (b.rodo !== true) return j(res, 400, { error: 'Wymagana zgoda na przetwarzanie danych.' });
 
     const name = String(b.name || '').trim().replace(/\s+/g, ' ');
-    if (name.length < 3 || name.length > 30 || !/\S+\s+\S+/.test(name)) {
+    if (name.length < 3 || name.length > 60 || !/\S+\s+\S+/.test(name)) {
       return j(res, 400, { error: 'Podaj imię i nazwisko.' });
     }
-    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/.test(name)) {
-      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery i spacje.' });
+    // Myślnik i apostrof są dopuszczone celowo: bez nich odpadały nazwiska
+    // dwuczłonowe („Kowalska-Nowak") i formy typu „D'Angelo".
+    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]+$/.test(name)) {
+      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery, spacje i myślnik.' });
     }
 
     const phone = String(b.phone || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');

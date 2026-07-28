@@ -54,6 +54,13 @@
   --color-primary-light: #4a7ba7;
   --color-accent: #b8915a;
   --color-accent-dark: #94703f;
+  /* Warianty akcentu pod kontrast WCAG AA (biały tekst wymaga min. 4.5:1).
+     Samo --color-accent na bieli daje tylko 2.9:1, więc do wypełnień
+     z białym napisem i do obrysu fokusu używamy ciemniejszego wariantu,
+     a na ciemnym tle (sekcja statystyk) — jaśniejszego. */
+  --color-accent-btn: #8e6c3d;        /* 4.81:1 z bielą */
+  --color-accent-btn-hover: #75592f;  /* 6.51:1 z bielą */
+  --color-accent-on-dark: #cdb28c;    /* min. 3.31:1 na gradiencie primary */
   --color-bg: #ffffff;
   --color-bg-alt: #f4f7fa;
   --color-text: #2d3748;
@@ -239,11 +246,11 @@ ul { list-style: none; }
 }
 
 .btn--accent {
-  background: var(--color-accent);
+  background: var(--color-accent-btn);
   color: white;
 }
 .btn--accent:hover {
-  background: var(--color-accent-dark);
+  background: var(--color-accent-btn-hover);
   color: white;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -519,7 +526,7 @@ ul { list-style: none; }
 }
 
 .phone-button:hover {
-  background: var(--color-accent);
+  background: var(--color-accent-btn);
   color: white;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -866,7 +873,7 @@ ul { list-style: none; }
 }
 
 .map-consent__btn:focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: 3px solid var(--color-accent-btn);
   outline-offset: 2px;
 }
 
@@ -1465,7 +1472,7 @@ ul { list-style: none; }
   font-family: var(--font-serif);
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-accent-on-dark);
   line-height: 1;
   margin-bottom: 0.5rem;
 }
@@ -1509,7 +1516,7 @@ ul { list-style: none; }
     bottom: 1rem;
     right: 1rem;
     z-index: 999;
-    background: var(--color-accent);
+    background: var(--color-accent-btn);
     color: #fff;
     padding: 0.85rem 1.25rem;
     border-radius: 999px;
@@ -1898,3 +1905,19 @@ ul { list-style: none; }
   transform: translateY(-50%);
   height: 28px;
 }
+
+/* --- Link „Przejdź do treści" (WCAG 2.4.1 Bypass Blocks) ---
+   Niewidoczny dopóki nie dostanie fokusu z klawiatury; wtedy wjeżdża
+   w lewy górny róg, żeby dało się pominąć nawigację jednym Tabem. */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 300;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-primary-dark);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0 0 6px 0;
+}
+.skip-link:focus { left: 0; }
