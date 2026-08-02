@@ -1544,6 +1544,15 @@ ul { list-style: none; }
   }
 }
 
+/* Dopoki baner cookies czeka na decyzje, plywajace CTA znika. Wczesniej lezalo
+   nad banerem (z-index 999 kontra 200) i przykrywalo przycisk „Tylko niezbedne"
+   — przy 360 px az w 65%, wiec dotkniecie srodka przycisku odmowy wybieralo
+   numer zamiast odrzucic cookies. Klasa na <body> zamiast selektora ~, bo
+   .sticky-cta stoi w DOM PRZED banerem. */
+body.cookie-banner-open .sticky-cta {
+  display: none;
+}
+
 /* ===================================================================
    Micro-interactions — service cards & testimonials hover
    =================================================================== */

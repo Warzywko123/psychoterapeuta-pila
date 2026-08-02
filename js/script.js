@@ -263,9 +263,12 @@
     // Wcześniej zaakceptowano — włącz GA4 od razu, bez pokazywania banera
     updateGoogleConsent(true);
   } else if (consent !== 'rejected') {
-    // Brak decyzji — pokaż baner po chwili
+    // Brak decyzji — pokaż baner po chwili.
+    // Klasa na <body> chowa pływające CTA „Zadzwoń", które inaczej leży nad
+    // banerem i przykrywa przycisk odmowy (patrz .sticky-cta w styles.css).
     setTimeout(function () {
       banner.classList.add('is-visible');
+      document.body.classList.add('cookie-banner-open');
     }, 800);
   }
 
@@ -273,6 +276,7 @@
     localStorage.setItem(COOKIE_KEY, value);
     updateGoogleConsent(value === 'accepted');
     banner.classList.remove('is-visible');
+    document.body.classList.remove('cookie-banner-open');
     // Mapa Google nasłuchuje tego zdarzenia i wczytuje się bez przeładowania strony
     document.dispatchEvent(new CustomEvent('cookies-decision', { detail: value }));
   }
