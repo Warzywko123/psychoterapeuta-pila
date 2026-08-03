@@ -1,5 +1,6 @@
-// POST /api/admin/login — hasło z env ADMIN_PASSWORD → ciasteczko sesji (90 dni).
-// Rate limit: max 8 nieudanych prób na IP w ciągu 15 minut.
+// POST /api/admin/login — hasło z env ADMIN_PASSWORD + kod TOTP → ciasteczko sesji
+// (długość sesji: SESSION_DAYS w _lib.js). Rate limit: max 8 nieudanych prób na IP
+// w ciągu 15 minut. Bez ADMIN_TOTP_SECRET logowanie jest zablokowane (fail closed).
 import crypto from 'node:crypto';
 import { ensureSchema, sql, makeSessionCookie, j, readBody, ipHashOf, verifyTOTP } from '../_lib.js';
 
@@ -15,6 +16,17 @@ export default async function handler(req, res) {
       return j(res, 429, { error: 'Zbyt wiele prób logowania. Spróbuj za 15 minut.' });
     }
 
+    // 2FA jest obowiązkowe. Gdyby ADMIN_TOTP_SECRET zniknął ze zmiennych środowiskowych,
+    // panel MUSI przestać wpuszczać kogokolwiek — wcześniej brak sekretu po cichu
+    // przełączał logowanie na samo hasło i nic tego nie sygnalizowało. Fail closed:
+    // wolimy zablokowany panel (do naprawienia zmienną w Vercelu) niż panel z danymi
+    // pacjentów chroniony jednym hasłem bez wiedzy właściciela.
+    const totpSecret = process.env.ADMIN_TOTP_SECRET || '';
+    if (!totpSecret) {
+      console.error('login: brak ADMIN_TOTP_SECRET — logowanie zablokowane (fail closed)');
+      return j(res, 503, { error: 'Panel chwilowo niedostępny — brak konfiguracji 2FA. Skontaktuj się z administratorem.' });
+    }
+
     const body = readBody(req);
     const given = String(body.password || '');
     const good = process.env.ADMIN_PASSWORD || '';
@@ -22,10 +34,7 @@ export default async function handler(req, res) {
     const b = crypto.createHash('sha256').update(good).digest();
     const passOk = !!good && crypto.timingSafeEqual(a, b);
 
-    // 2FA: jeśli skonfigurowano ADMIN_TOTP_SECRET, wymagaj też kodu z aplikacji.
-    // Gdy sekret nie ustawiony (przed konfiguracją) — logowanie działa jak dotąd.
-    const totpSecret = process.env.ADMIN_TOTP_SECRET || '';
-    const totpOk = totpSecret ? verifyTOTP(totpSecret, body.totp) : true;
+    const totpOk = verifyTOTP(totpSecret, body.totp);
 
     // Sprawdzamy oba naraz i zwracamy jeden ogólny błąd — nie zdradzamy,
     // czy pomylono hasło czy kod (żeby nie ułatwiać zgadywania).

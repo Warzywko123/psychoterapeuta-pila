@@ -27,7 +27,16 @@ if (process.env.PGLITE_DIR && !path.isAbsolute(process.env.PGLITE_DIR)) {
 
 // Ta sama polityka CSP co w vercel.json — powielona tutaj, żeby dało się
 // przetestować lokalnie (dev-server nie czyta vercel.json). Trzymać w zgodzie z vercel.json.
-const CSP = "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://*.analytics.google.com; frame-src https://*.google.com";
+//
+// UWAGA: script-src nie ma już 'unsafe-inline'. Jedyny wykonywalny skrypt inline
+// (snippet zgody + Google Analytics, identyczny na wszystkich 16 podstronach) jest
+// dopuszczony przez hash SHA-256 jego DOKŁADNEJ treści. Zmiana choćby jednej spacji
+// w tym skrypcie unieważnia hash i przeglądarka przestanie go wykonywać — czyli
+// zniknie baner cookies i analityka. Po każdej edycji tego snippetu przelicz hash:
+//   node -e "const fs=require('fs'),c=require('crypto');const m=fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*?)<\/script>/);console.log('sha256-'+c.createHash('sha256').update(m[1]).digest('base64'))"
+// i wstaw wynik TU ORAZ w vercel.json. Bloki <script type="application/ld+json">
+// to bloki danych, nie skrypty — CSP ich nie dotyczy i nie wymagają hashy.
+const CSP = "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'sha256-qnd/sdChtC+BKY0HwAeO3Q5nPACNafi2x2uhyLgaqQ0=' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://*.analytics.google.com; frame-src https://*.google.com";
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

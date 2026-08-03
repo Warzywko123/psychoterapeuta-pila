@@ -965,7 +965,12 @@ ul { list-style: none; }
   .contact-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 700px) {
+/* Nawigacja przechodzi w hamburger już od 900px. Poziome menu (logo + 7 pozycji
+   z odstępem 2rem) nie mieściło się poniżej ~880px — pozycje ściskały się i „O mnie"
+   łamało się na dwie linie. Dziura 701–880px trafiała w każdy tablet trzymany
+   pionowo (iPad 768, iPad Air 820, iPad Pro 11" 834). Odstępy sekcji zostają
+   na 700px, żeby zmiana nie ruszyła układu treści na tabletach. */
+@media (max-width: 900px) {
   .nav__menu {
     display: none;
     position: absolute;
@@ -988,6 +993,9 @@ ul { list-style: none; }
   .nav__link { display: block; padding: 1rem var(--space-md); }
   .nav__link::after { display: none; }
   .nav__toggle { display: block; }
+}
+
+@media (max-width: 700px) {
   .section, .hero { padding: var(--space-lg) 0; }
   .about-hero { padding: var(--space-lg) var(--space-md); }
 }
