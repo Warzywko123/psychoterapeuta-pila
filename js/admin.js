@@ -471,9 +471,15 @@
     $('modal-title').textContent = DAY_NAMES[day.getDay()] + ', ' + day.getDate() + ' ' + MONTHS[day.getMonth()] + ', godz. ' + hhmm(b.slot_min);
     $('modal-name').textContent = b.name;
     var p1 = digitsOnly(b.phone), p2 = digitsOnly(b.phone2);
+    // Telefon jest opcjonalny przy ręcznym wpisaniu pacjenta, więc może go nie być.
+    // Bez tego warunku okno pokazywało samą słuchawkę z martwym odnośnikiem "tel:+48".
     var tel = $('modal-phone');
-    tel.textContent = '📞 ' + prettyPhone(p1);
-    tel.href = 'tel:+48' + p1;
+    $('modal-phone-wrap').style.display = p1 ? '' : 'none';
+    $('modal-no-phone').style.display = p1 ? 'none' : '';
+    if (p1) {
+      tel.textContent = '📞 ' + prettyPhone(p1);
+      tel.href = 'tel:+48' + p1;
+    }
     var tel2wrap = $('modal-phone2-wrap');
     var tel2 = $('modal-phone2');
     if (p2) {
@@ -522,7 +528,12 @@
     };
 
     $('modal-cancel').onclick = function () {
-      if (confirm('Odwołać tę wizytę?\n\nPAMIĘTAJ: zadzwoń do pacjenta ' + prettyPhone(b.phone) + ' i poinformuj o odwołaniu.')) {
+      // Przy pacjencie bez numeru nie ma do kogo dzwonić — zamiast urwanego zdania
+      // („zadzwoń do pacjenta  i poinformuj") mama dostaje jasne ostrzeżenie.
+      var przypomnienie = p1
+        ? 'PAMIĘTAJ: zadzwoń do pacjenta ' + prettyPhone(p1) + ' i poinformuj o odwołaniu.'
+        : 'UWAGA: ta wizyta nie ma zapisanego numeru telefonu — pacjenta trzeba powiadomić inną drogą.';
+      if (confirm('Odwołać tę wizytę?\n\n' + przypomnienie)) {
         api('/api/admin/cancel', { method: 'POST', body: JSON.stringify({ id: b.id }) })
           .then(function (res) {
             closeModal();
