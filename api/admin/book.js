@@ -35,9 +35,11 @@ export default async function handler(req, res) {
     }
 
     const name = String(b.name || '').trim().replace(/\s+/g, ' ');
-    if (name.length < 2 || name.length > 30) return j(res, 400, { error: 'Podaj imię i nazwisko pacjenta.' });
-    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/.test(name)) {
-      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery i spacje.' });
+    if (name.length < 2 || name.length > 40) return j(res, 400, { error: 'Podaj imię i nazwisko pacjenta.' });
+    // Myślnik i apostrof dozwolone tak samo jak w formularzu pacjenta (api/book.js) — bez nich
+    // nie dało się wpisać ręcznie osoby o nazwisku dwuczłonowym („Kowalska-Nowak") ani „D'Angelo".
+    if (!/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]+$/.test(name)) {
+      return j(res, 400, { error: 'Imię i nazwisko może zawierać tylko litery, spacje i myślnik.' });
     }
 
     let phone = String(b.phone || '').replace(/[\s\-().]/g, '').replace(/^\+?48/, '');

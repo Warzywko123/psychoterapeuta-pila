@@ -335,7 +335,7 @@
 
   // Filtry wpisywania jak w formularzu pacjenta
   $('sf-name').addEventListener('input', function () {
-    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]/g, '');
+    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
   });
   $('sf-phone').addEventListener('input', function () {
     var digits = this.value.replace(/\D/g, '');
@@ -391,7 +391,7 @@
   customModal.addEventListener('click', function (e) { if (e.target === customModal) closeCustomModal(); });
 
   $('cf-name').addEventListener('input', function () {
-    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]/g, '');
+    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
   });
   $('cf-phone').addEventListener('input', function () {
     var digits = this.value.replace(/\D/g, '');

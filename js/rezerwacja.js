@@ -137,7 +137,8 @@
     formError.classList.remove('is-visible');
   }
 
-  // Filtry wpisywania: telefon = tylko cyfry (max 9), imię i nazwisko = tylko litery
+  // Filtry wpisywania: telefon = tylko cyfry (max 9), imię i nazwisko = litery, spacje,
+  // myślnik i apostrof (nazwiska dwuczłonowe — ten sam zestaw znaków co pattern w HTML i /api/book)
   var phoneInput = document.getElementById('f-phone');
   phoneInput.addEventListener('input', function () {
     var digits = this.value.replace(/\D/g, '');
@@ -161,7 +162,7 @@
 
   var nameInput = document.getElementById('f-name');
   nameInput.addEventListener('input', function () {
-    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]/g, '');
+    this.value = this.value.replace(/[^a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s'-]/g, '');
   });
 
   document.getElementById('form-change-slot').addEventListener('click', function () {
