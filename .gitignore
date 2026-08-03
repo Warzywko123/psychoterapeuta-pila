@@ -28,8 +28,10 @@ build/
 kartki/
 .env*
 
-# Lokalna baza dev (PGlite) + node
+# Lokalna baza dev (PGlite) + bazy testowe + node
 .pglite/
+.pglite-test/
+.pglite*/
 node_modules/
 
 # Wewnętrzne notatki marketingowe (nie publikować)

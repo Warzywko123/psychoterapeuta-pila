@@ -1,6 +1,7 @@
 # Pliki wyłącznie deweloperskie — nie wysyłać na produkcję
 dev-server.js
 .pglite
+.pglite-test
 .env.local
 posty-gbp.md
 kartki
