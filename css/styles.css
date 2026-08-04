@@ -1367,9 +1367,12 @@ ul { list-style: none; }
     padding: 0.6rem 2.5rem 0.6rem 0.75rem;
     line-height: 1.4;
   }
+  /* Data zostaje w toku zdania. Wcześniej display:block wypychał ją do własnej
+     linii, przez co kolejna linia zaczynała się od osamotnionej kropki
+     („11–18 sierpnia" / „. Wznowienie wizyt…"). white-space:nowrap z reguły
+     bazowej pilnuje tylko, żeby sam zakres dat nie pękł na dwie linie. */
   .vacation-banner__strong {
-    display: block;
-    white-space: normal;
+    display: inline;
   }
 }
 

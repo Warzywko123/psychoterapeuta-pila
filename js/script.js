@@ -103,31 +103,74 @@
   })();
 
   // ----- Banner urlopowy -----
-  // Pokazuje pasek tylko w okresie 11.06.2026 - 21.06.2026
-  // Po tej dacie automatycznie się nie wyświetla
+  // ==========================================================================
+  // KOLEJNY URLOP = ZMIANA CZTERECH DAT W OBIEKCIE `URLOP` PONIŻEJ.
+  // Nic więcej: treść paska (zakres dni, dzień powrotu, odmiana czasownika)
+  // liczy się z tych dat, a w HTML stoi pusty <span class="vacation-banner__text">.
+  // Wcześniej daty były w dwóch miejscach — tutaj i wklepane w tekst na
+  // kilkunastu podstronach — więc każda zmiana wymagała edycji 17 plików.
+  // Po edycji podbić ?v= przy js/script.js (plik ma roczny immutable-cache).
+  // ==========================================================================
   (function vacationBanner() {
     const banner = document.querySelector('.vacation-banner');
     if (!banner) return;
 
-    // Okres urlopu (start: 11.06, koniec: 21.06 do końca dnia)
-    const vacationStart = new Date('2026-06-11T00:00:00');
-    const vacationEnd = new Date('2026-06-21T23:59:59');
+    const URLOP = {
+      od: new Date('2026-08-11T00:00:00'),       // pierwszy dzień wolnego
+      do: new Date('2026-08-18T23:59:59'),       // ostatni dzień wolnego (do końca doby)
+      pokazOd: new Date('2026-08-03T00:00:00'),  // od kiedy zapowiadać (zwykle przed urlopem)
+      powrot: new Date('2026-08-19T00:00:00'),   // pierwszy dzień przyjęć po urlopie
+    };
+
     const now = new Date();
+    // Pasek wisi od zapowiedzi aż do końca ostatniego dnia wolnego.
+    if (now < URLOP.pokazOd || now > URLOP.do) return;
 
-    // Pokazuj tylko jeśli jesteśmy w okresie urlopu
-    if (now < vacationStart || now > vacationEnd) return;
+    const MIESIACE = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca',
+      'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
+    const DNI = ['niedzieli', 'poniedziałku', 'wtorku', 'środy', 'czwartku', 'piątku', 'soboty'];
 
-    // Sprawdź czy user już zamknął banner (sessionStorage = znika po zamknięciu zakładki)
-    const closed = sessionStorage.getItem('vacationBannerClosed');
-    if (!closed) {
-      banner.classList.add('is-visible');
+    // „11–18 sierpnia" gdy jeden miesiąc, „30 lipca – 5 sierpnia" gdy urlop go przekracza.
+    const zakres = URLOP.od.getMonth() === URLOP.do.getMonth()
+      ? URLOP.od.getDate() + '–' + URLOP.do.getDate() + ' ' + MIESIACE[URLOP.do.getMonth()]
+      : URLOP.od.getDate() + ' ' + MIESIACE[URLOP.od.getMonth()] + ' – ' +
+        URLOP.do.getDate() + ' ' + MIESIACE[URLOP.do.getMonth()];
+
+    const powrot = DNI[URLOP.powrot.getDay()] + ' ' + URLOP.powrot.getDate() + ' ' +
+      MIESIACE[URLOP.powrot.getMonth()];
+
+    // Przed urlopem to zapowiedź („będzie zamknięty"), w trakcie stan faktyczny.
+    const czasownik = now < URLOP.od ? 'będzie zamknięty' : 'jest zamknięty';
+
+    const tekst = banner.querySelector('.vacation-banner__text');
+    if (tekst) {
+      const mocny = document.createElement('span');
+      mocny.className = 'vacation-banner__strong';
+      mocny.textContent = zakres;
+      tekst.textContent = '';
+      tekst.append(
+        document.createTextNode('Gabinet ' + czasownik + ': '),
+        mocny,
+        document.createTextNode('. Wznowienie wizyt od ' + powrot + '.')
+      );
     }
+
+    // Zamknięcie pamiętane na czas sesji karty. Klucz zawiera datę urlopu, więc
+    // zamknięcie poprzedniego komunikatu nie ukrywa następnego. Data składana
+    // z pól lokalnych, nie przez toISOString() — ten przeliczyłby północ czasu
+    // polskiego na UTC i klucz nosiłby dzień wcześniejszy niż początek urlopu.
+    const kluczZamkniecia = 'vacationBannerClosed-' + URLOP.od.getFullYear() + '-' +
+      String(URLOP.od.getMonth() + 1).padStart(2, '0') + '-' +
+      String(URLOP.od.getDate()).padStart(2, '0');
+    let zamkniety = false;
+    try { zamkniety = !!sessionStorage.getItem(kluczZamkniecia); } catch (e) { /* tryb prywatny */ }
+    if (!zamkniety) banner.classList.add('is-visible');
 
     const closeBtn = banner.querySelector('.vacation-banner__close');
     if (closeBtn) {
       closeBtn.addEventListener('click', function() {
         banner.classList.remove('is-visible');
-        sessionStorage.setItem('vacationBannerClosed', '1');
+        try { sessionStorage.setItem(kluczZamkniecia, '1'); } catch (e) { /* tryb prywatny */ }
       });
     }
   })();

@@ -51,7 +51,7 @@
   <!-- Arkusz wczytywany normalnie. Wariant asynchroniczny (media="print" onload)
        powodowal przeskok ukladu przy wczytywaniu: strona rysowala sie na stylach
        krytycznych, a po dojechaniu arkusza przeliczala sie od nowa (CLS 0,13-0,60). -->
-  <link rel="stylesheet" href="css/styles.css?v=28">
+  <link rel="stylesheet" href="css/styles.css?v=29">
 
   <!-- Schema.org FAQPage — pozwala Google pokazać rozszerzony wynik z pytaniami -->
   <script type="application/ld+json">
@@ -279,9 +279,10 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Przejdź do treści</a>
+  <!-- Treść wypełnia js/script.js z jednego zestawu dat (szukaj: URLOP). -->
   <div class="vacation-banner" role="status" aria-live="polite">
     <span class="vacation-banner__icon" aria-hidden="true">📅</span>
-    Gabinet zamknięty: <span class="vacation-banner__strong">11–21 czerwca</span>. Wznowienie wizyt od poniedziałku 22 czerwca.
+    <span class="vacation-banner__text"></span>
     <button class="vacation-banner__close" aria-label="Zamknij komunikat" type="button">×</button>
   </div>
   <header class="header">
@@ -504,6 +505,6 @@
     </div>
   </div>
 
-  <script src="js/script.js?v=8"></script>
+  <script src="js/script.js?v=9"></script>
 </body>
 </html>

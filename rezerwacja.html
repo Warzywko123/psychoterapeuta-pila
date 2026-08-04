@@ -52,7 +52,7 @@
   <!-- Arkusz wczytywany normalnie. Wariant asynchroniczny (media="print" onload)
        powodowal przeskok ukladu przy wczytywaniu: strona rysowala sie na stylach
        krytycznych, a po dojechaniu arkusza przeliczala sie od nowa (CLS 0,13-0,60). -->
-  <link rel="stylesheet" href="css/styles.css?v=28">
+  <link rel="stylesheet" href="css/styles.css?v=29">
 
   <!-- BreadcrumbList Schema -->
   <script type="application/ld+json">
@@ -127,6 +127,13 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Przejdź do treści</a>
+
+  <!-- Treść wypełnia js/script.js z jednego zestawu dat (szukaj: URLOP). -->
+  <div class="vacation-banner" role="status" aria-live="polite">
+    <span class="vacation-banner__icon" aria-hidden="true">📅</span>
+    <span class="vacation-banner__text"></span>
+    <button class="vacation-banner__close" aria-label="Zamknij komunikat" type="button">×</button>
+  </div>
   <header class="header">
     <nav class="nav" aria-label="Główna nawigacja">
       <a href="index.html" class="nav__logo">
@@ -283,7 +290,7 @@
     </div>
   </div>
 
-  <script src="js/script.js?v=8"></script>
+  <script src="js/script.js?v=9"></script>
   <script src="js/rezerwacja.js?v=7"></script>
 </body>
 </html>
